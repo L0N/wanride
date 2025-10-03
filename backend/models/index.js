@@ -87,36 +87,3 @@ module.exports.getRelationships = () => {
   };
 };
 
-// Database statistics helper
-module.exports.getStats = async () => {
-  try {
-    const stats = {};
-    
-    // Get collection stats for each model
-    const models = [User, Ride, Referral, Document, Session];
-    
-    for (const Model of models) {
-      try {
-        const count = await Model.countDocuments();
-        const sampleDoc = await Model.findOne().lean();
-        
-        stats[Model.modelName] = {
-          count,
-          hasData: count > 0,
-          sampleFields: sampleDoc ? Object.keys(sampleDoc).length : 0,
-          indexes: Model.collection.getIndexes ? await Model.collection.getIndexes() : {}
-        };
-      } catch (error) {
-        stats[Model.modelName] = {
-          count: 0,
-          hasData: false,
-          error: error.message
-        };
-      }
-    }
-    
-    return stats;
-  } catch (error) {
-    return { error: error.message };
-  }
-};

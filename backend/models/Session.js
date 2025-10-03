@@ -50,18 +50,8 @@ const sessionSchema = new mongoose.Schema({
   },
   
   // Session Status
-  isActive: {
-    type: Boolean,
-    default: true,
-    index: true
-  },
-  
-  isRevoked: {
-    type: Boolean,
-    default: false,
-    index: true
-  },
-  
+  isActive: { type: Boolean, default: true, index: true },
+  isRevoked: { type: Boolean, default: false, index: true },
   revokedAt: Date,
   
   revokedBy: {
@@ -85,10 +75,7 @@ const sessionSchema = new mongoose.Schema({
   
   // Device and Location Information
   deviceInfo: {
-    userAgent: {
-      type: String,
-      trim: true
-    },
+    userAgent: String,
     browser: {
       name: String,
       version: String
@@ -103,10 +90,7 @@ const sessionSchema = new mongoose.Schema({
       default: 'unknown'
     },
     platform: String,
-    isMobile: {
-      type: Boolean,
-      default: false
-    }
+    isMobile: { type: Boolean, default: false }
   },
   
   // IP and Location Tracking
@@ -136,17 +120,9 @@ const sessionSchema = new mongoose.Schema({
     required: [true, 'Login method is required']
   },
   
-  twoFactorUsed: {
-    type: Boolean,
-    default: false
-  },
+  twoFactorUsed: { type: Boolean, default: false },
   
-  riskScore: {
-    type: Number,
-    min: 0,
-    max: 100,
-    default: 0
-  },
+  riskScore: { type: Number, min: 0, max: 100, default: 0 },
   
   riskFactors: [{
     type: String,
@@ -163,17 +139,8 @@ const sessionSchema = new mongoose.Schema({
   }],
   
   // Session Activity
-  lastActivity: {
-    type: Date,
-    default: Date.now,
-    index: true
-  },
-  
-  activityCount: {
-    type: Number,
-    default: 1,
-    min: 0
-  },
+  lastActivity: { type: Date, default: Date.now, index: true },
+  activityCount: { type: Number, default: 1, min: 0 },
   
   // Activity Log (last 10 activities)
   recentActivities: [{
@@ -195,10 +162,7 @@ const sessionSchema = new mongoose.Schema({
       type: String,
       enum: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
     },
-    timestamp: {
-      type: Date,
-      default: Date.now
-    },
+    timestamp: { type: Date, default: Date.now },
     ipAddress: String,
     userAgent: String,
     responseStatus: Number,
@@ -206,71 +170,20 @@ const sessionSchema = new mongoose.Schema({
   }],
   
   // Session Metadata
-  loginAt: {
-    type: Date,
-    default: Date.now,
-    index: true
-  },
-  
+  loginAt: { type: Date, default: Date.now, index: true },
   logoutAt: Date,
-  
-  duration: {
-    type: Number, // in seconds
-    default: 0
-  },
-  
-  // Concurrent Sessions Control
-  maxConcurrentSessions: {
-    type: Number,
-    default: 5,
-    min: 1,
-    max: 10
-  },
+  duration: { type: Number, default: 0 }, // in seconds
   
   // Session Preferences
   preferences: {
-    rememberMe: {
-      type: Boolean,
-      default: false
-    },
-    stayLoggedIn: {
-      type: Boolean,
-      default: false
-    },
-    sessionTimeout: {
-      type: Number, // in minutes
-      default: 60,
-      min: 5,
-      max: 1440 // 24 hours
-    }
-  },
-  
-  // Compliance and Audit
-  gdprConsent: {
-    type: Boolean,
-    default: false
-  },
-  
-  dataRetentionDays: {
-    type: Number,
-    default: 90 // 3 months
+    rememberMe: { type: Boolean, default: false },
+    stayLoggedIn: { type: Boolean, default: false },
+    sessionTimeout: { type: Number, default: 60, min: 5, max: 1440 } // in minutes
   },
   
   // System flags
-  isSystemGenerated: {
-    type: Boolean,
-    default: false
-  },
-  
-  isSuspicious: {
-    type: Boolean,
-    default: false
-  },
-  
-  requiresReauth: {
-    type: Boolean,
-    default: false
-  }
+  isSuspicious: { type: Boolean, default: false },
+  requiresReauth: { type: Boolean, default: false }
 
 }, {
   timestamps: true,
@@ -287,12 +200,6 @@ sessionSchema.index({ isActive: 1, isRevoked: 1 });
 sessionSchema.index({ lastActivity: -1 });
 sessionSchema.index({ loginAt: -1 });
 sessionSchema.index({ ipAddress: 1 });
-sessionSchema.index({ 'deviceInfo.device': 1 });
-
-// Compound indexes
-sessionSchema.index({ user: 1, loginAt: -1 });
-sessionSchema.index({ isActive: 1, lastActivity: -1 });
-sessionSchema.index({ user: 1, isActive: 1, lastActivity: -1 });
 
 // Virtual for session age in minutes
 sessionSchema.virtual('ageInMinutes').get(function() {
@@ -305,12 +212,6 @@ sessionSchema.virtual('accessTokenExpiresInMinutes').get(function() {
   return Math.max(0, Math.floor((this.accessTokenExpiresAt - Date.now()) / (1000 * 60)));
 });
 
-// Virtual for time until refresh token expires
-sessionSchema.virtual('refreshTokenExpiresInMinutes').get(function() {
-  if (!this.refreshTokenExpiresAt) return 0;
-  return Math.max(0, Math.floor((this.refreshTokenExpiresAt - Date.now()) / (1000 * 60)));
-});
-
 // Virtual for session status
 sessionSchema.virtual('status').get(function() {
   if (this.isRevoked) return 'revoked';
@@ -318,11 +219,6 @@ sessionSchema.virtual('status').get(function() {
   if (this.accessTokenExpiresAt < new Date()) return 'access-expired';
   if (this.refreshTokenExpiresAt < new Date()) return 'refresh-expired';
   return 'active';
-});
-
-// Virtual for inactivity duration in minutes
-sessionSchema.virtual('inactivityMinutes').get(function() {
-  return Math.floor((Date.now() - this.lastActivity) / (1000 * 60));
 });
 
 // Pre-save middleware to calculate session duration
@@ -349,25 +245,6 @@ sessionSchema.methods.revoke = function(reason = 'user-logout', revokedBy = null
   if (revokedBy) {
     this.revokedBy = revokedBy;
   }
-  
-  return this.save();
-};
-
-// Method to refresh tokens
-sessionSchema.methods.refreshTokens = function(newAccessToken, newRefreshToken, accessTokenExpiry, refreshTokenExpiry) {
-  // Revoke current session
-  this.revoke('token-refresh');
-  
-  // Create new session data
-  this.accessToken = newAccessToken;
-  this.refreshToken = newRefreshToken;
-  this.accessTokenExpiresAt = accessTokenExpiry;
-  this.refreshTokenExpiresAt = refreshTokenExpiry;
-  this.isActive = true;
-  this.isRevoked = false;
-  this.revokedAt = undefined;
-  this.revocationReason = undefined;
-  this.lastActivity = new Date();
   
   return this.save();
 };
@@ -413,14 +290,6 @@ sessionSchema.methods.needsRefresh = function() {
   return this.accessTokenExpiresAt < new Date(now.getTime() + fiveMinutes);
 };
 
-// Method to check if session is inactive
-sessionSchema.methods.isInactive = function(timeoutMinutes = null) {
-  const timeout = timeoutMinutes || this.preferences.sessionTimeout || 60;
-  const inactivityThreshold = timeout * 60 * 1000; // Convert to milliseconds
-  
-  return (Date.now() - this.lastActivity) > inactivityThreshold;
-};
-
 // Static method to find active sessions for user
 sessionSchema.statics.findActiveByUser = function(userId) {
   return this.find({
@@ -455,28 +324,6 @@ sessionSchema.statics.cleanupExpired = function() {
   );
 };
 
-// Static method to cleanup inactive sessions
-sessionSchema.statics.cleanupInactive = function(inactivityMinutes = 60) {
-  const inactivityThreshold = new Date(Date.now() - inactivityMinutes * 60 * 1000);
-  
-  return this.updateMany(
-    {
-      lastActivity: { $lt: inactivityThreshold },
-      isActive: true,
-      isRevoked: false
-    },
-    {
-      $set: {
-        isActive: false,
-        isRevoked: true,
-        revokedAt: new Date(),
-        logoutAt: new Date(),
-        revocationReason: 'inactive'
-      }
-    }
-  );
-};
-
 // Static method to revoke all sessions for user
 sessionSchema.statics.revokeAllForUser = function(userId, reason = 'security', revokedBy = null) {
   const updateData = {
@@ -501,64 +348,5 @@ sessionSchema.statics.revokeAllForUser = function(userId, reason = 'security', r
   );
 };
 
-// Static method to get session statistics
-sessionSchema.statics.getSessionStats = function(userId = null, days = 30) {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
-  
-  const matchStage = { loginAt: { $gte: startDate } };
-  if (userId) {
-    matchStage.user = new mongoose.Types.ObjectId(userId);
-  }
-  
-  return this.aggregate([
-    { $match: matchStage },
-    {
-      $group: {
-        _id: {
-          date: { $dateToString: { format: '%Y-%m-%d', date: '$loginAt' } },
-          device: '$deviceInfo.device'
-        },
-        count: { $sum: 1 },
-        uniqueUsers: { $addToSet: '$user' },
-        avgDuration: { $avg: '$duration' },
-        suspiciousCount: {
-          $sum: { $cond: ['$isSuspicious', 1, 0] }
-        }
-      }
-    },
-    {
-      $group: {
-        _id: '$_id.date',
-        totalSessions: { $sum: '$count' },
-        uniqueUsers: { $sum: { $size: '$uniqueUsers' } },
-        deviceBreakdown: {
-          $push: {
-            device: '$_id.device',
-            count: '$count'
-          }
-        },
-        avgDuration: { $avg: '$avgDuration' },
-        suspiciousCount: { $sum: '$suspiciousCount' }
-      }
-    },
-    { $sort: { _id: 1 } }
-  ]);
-};
-
-// Static method to find suspicious sessions
-sessionSchema.statics.findSuspicious = function(limit = 100) {
-  return this.find({
-    $or: [
-      { isSuspicious: true },
-      { riskScore: { $gte: 70 } },
-      { riskFactors: { $exists: true, $not: { $size: 0 } } }
-    ],
-    isActive: true
-  })
-  .populate('user', 'email role fullName')
-  .sort({ riskScore: -1, loginAt: -1 })
-  .limit(limit);
-};
-
 module.exports = mongoose.model('Session', sessionSchema);
+
