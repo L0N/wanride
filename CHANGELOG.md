@@ -69,7 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [x] React frontend foundation
 - [x] Security middleware configuration
 
-### Phase 2: ✅ Database Models and Schemas (Completed)
+### Phase 2: 🔄 Database Models and Schemas (Retrying implementation)
 - [x] User schema with multi-role support (Client, Driver, Company, Admin)
 - [x] Ride schema with complete status flow and profit calculation
 - [x] Referral schema with earnings tracking and 0.25% profit sharing
