@@ -290,6 +290,17 @@ sessionSchema.methods.needsRefresh = function() {
   return this.accessTokenExpiresAt < new Date(now.getTime() + fiveMinutes);
 };
 
+// Method to refresh tokens
+sessionSchema.methods.refreshTokens = function(newAccessToken, newRefreshToken, newAccessExpiry, newRefreshExpiry) {
+  this.accessToken = newAccessToken;
+  this.refreshToken = newRefreshToken;
+  this.accessTokenExpiresAt = newAccessExpiry;
+  this.refreshTokenExpiresAt = newRefreshExpiry;
+  this.lastActivity = new Date();
+  
+  return this.save();
+};
+
 // Static method to find active sessions for user
 sessionSchema.statics.findActiveByUser = function(userId) {
   return this.find({
@@ -349,4 +360,3 @@ sessionSchema.statics.revokeAllForUser = function(userId, reason = 'security', r
 };
 
 module.exports = mongoose.model('Session', sessionSchema);
-

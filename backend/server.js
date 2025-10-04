@@ -12,8 +12,8 @@ require('dotenv').config();
 const connectDB = require('./config/database');
 const logger = require('./config/logger');
 
-// Import routes (will be created in later phases)
-// const authRoutes = require('./routes/auth');
+// Import routes
+const authRoutes = require('./routes/auth');
 // const rideRoutes = require('./routes/rides');
 // const documentRoutes = require('./routes/documents');
 // const referralRoutes = require('./routes/referrals');
@@ -80,8 +80,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes (will be uncommented in later phases)
-// app.use('/api/auth', authRoutes);
+// API routes
+app.use('/api/auth', authRoutes);
 // app.use('/api/rides', rideRoutes);
 // app.use('/api/documents', documentRoutes);
 // app.use('/api/referrals', referralRoutes);
