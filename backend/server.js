@@ -15,9 +15,9 @@ const logger = require('./config/logger');
 // Import routes
 const authRoutes = require('./routes/auth');
 // const rideRoutes = require('./routes/rides');
-// const documentRoutes = require('./routes/documents');
+const documentRoutes = require('./routes/documents');
 // const referralRoutes = require('./routes/referrals');
-// const adminRoutes = require('./routes/admin');
+const adminRoutes = require('./routes/admin');
 
 // Import socket handlers (will be created in later phases)
 // const socketHandlers = require('./socket');
@@ -83,9 +83,9 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/auth', authRoutes);
 // app.use('/api/rides', rideRoutes);
-// app.use('/api/documents', documentRoutes);
+app.use('/api/documents', documentRoutes);
 // app.use('/api/referrals', referralRoutes);
-// app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Socket.io connection handling (will be implemented in later phases)
 io.on('connection', (socket) => {
