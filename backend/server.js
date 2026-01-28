@@ -14,7 +14,7 @@ const logger = require('./config/logger');
 
 // Import routes
 const authRoutes = require('./routes/auth');
-// const rideRoutes = require('./routes/rides');
+const rideRoutes = require('./routes/rides');
 // const documentRoutes = require('./routes/documents');
 // const referralRoutes = require('./routes/referrals');
 // const adminRoutes = require('./routes/admin');
@@ -82,27 +82,24 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/api/auth', authRoutes);
-// app.use('/api/rides', rideRoutes);
+app.use('/api/rides', rideRoutes);
 // app.use('/api/documents', documentRoutes);
 // app.use('/api/referrals', referralRoutes);
 // app.use('/api/admin', adminRoutes);
 
-// Socket.io connection handling (will be implemented in later phases)
+// Socket.io authentication and connection handling
+const socketAuth = require('./middleware/socketAuth');
+const SocketHandlers = require('./socket/socketHandlers');
+
+// Initialize socket handlers
+const socketHandlers = new SocketHandlers(io);
+
+// Apply authentication middleware
+io.use(socketAuth);
+
+// Handle socket connections
 io.on('connection', (socket) => {
-  logger.info(`New client connected: ${socket.id}`);
-  
-  // Basic connection acknowledgment
-  socket.emit('connected', { 
-    message: 'Connected to WanRides server',
-    socketId: socket.id 
-  });
-
-  socket.on('disconnect', (reason) => {
-    logger.info(`Client disconnected: ${socket.id}, reason: ${reason}`);
-  });
-
-  // Socket handlers will be added in Phase 7
-  // socketHandlers(io, socket);
+  socketHandlers.handleConnection(socket);
 });
 
 // 404 handler

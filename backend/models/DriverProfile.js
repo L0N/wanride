@@ -42,7 +42,25 @@ const driverProfileSchema = new mongoose.Schema({
   
   isOnline: {
     type: Boolean,
-    default: false
+    default: false,
+    index: true
+  },
+  
+  currentRideId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'RideRequest',
+    default: null,
+    index: true
+  },
+  
+  onlineAt: {
+    type: Date,
+    default: null
+  },
+  
+  offlineAt: {
+    type: Date,
+    default: null
   },
   
   rating: {
@@ -294,13 +312,37 @@ driverProfileSchema.methods.goOnline = function() {
   }
   
   this.isOnline = true;
+  this.onlineAt = new Date();
+  this.offlineAt = null;
   return this.save();
 };
 
 // Instance method to go offline
 driverProfileSchema.methods.goOffline = function() {
   this.isOnline = false;
+  this.offlineAt = new Date();
   return this.save();
+};
+
+// Instance method to assign ride
+driverProfileSchema.methods.assignRide = function(rideId) {
+  this.currentRideId = rideId;
+  return this.save();
+};
+
+// Instance method to complete ride
+driverProfileSchema.methods.completeRide = function() {
+  this.currentRideId = null;
+  this.totalRides += 1;
+  return this.save();
+};
+
+// Instance method to check if driver is available
+driverProfileSchema.methods.isAvailable = function() {
+  return this.isOnline && 
+         this.status === 'ACTIVE' && 
+         this.assignedVehicleId !== null && 
+         this.currentRideId === null;
 };
 
 // Instance method to update rating
@@ -324,6 +366,7 @@ driverProfileSchema.statics.findNearbyAvailableDrivers = function(longitude, lat
     status: 'ACTIVE',
     isOnline: true,
     assignedVehicleId: { $ne: null },
+    currentRideId: null, // Only available drivers
     currentLocation: {
       $near: {
         $geometry: {
