@@ -2,7 +2,14 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  // Basic Information
+  name: {
+    type: String,
+    required: [true, 'Name is required'],
+    trim: true,
+    minlength: [2, 'Name must be at least 2 characters long'],
+    maxlength: [100, 'Name cannot exceed 100 characters']
+  },
+  
   email: {
     type: String,
     required: [true, 'Email is required'],
@@ -17,145 +24,117 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Phone number is required'],
     unique: true,
     trim: true,
-    match: [/^\+?[\d\s-()]+$/, 'Please enter a valid phone number']
+    match: [/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number']
   },
   
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters'],
-    select: false // Don't include password in queries by default
+    minlength: [8, 'Password must be at least 8 characters long'],
+    select: false
   },
   
-  // Role Management - Multi-role support as specified
-  role: {
+  roles: [{
     type: String,
-    enum: ['client', 'driver', 'company', 'admin'],
-    required: [true, 'User role is required'],
-    default: 'client'
+    enum: ['PASSENGER', 'DRIVER', 'DISPATCHER', 'OWNER'],
+    required: true
+  }],
+  
+  rating: {
+    type: Number,
+    min: [1, 'Rating must be at least 1'],
+    max: [5, 'Rating cannot exceed 5'],
+    default: 5.0
   },
   
-  // Role-specific Profile Data
-  profile: {
-    // Client Profile
-    client: {
-      firstName: String,
-      lastName: String,
-      referralCode: String,
-      appliedReferral: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Referral'
-      },
-      totalRides: { type: Number, default: 0 },
-      totalSpent: { type: Number, default: 0 }
-    },
-    
-    // Driver Profile
-    driver: {
-      firstName: String,
-      lastName: String,
-      license: String,
-      documents: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Document'
-      }],
-      company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      },
-      isAvailable: { type: Boolean, default: false },
-      currentLocation: {
-        type: { type: String, enum: ['Point'], default: 'Point' },
-        coordinates: { type: [Number], default: [0, 0] }
-      },
-      totalRides: { type: Number, default: 0 },
-      totalEarnings: { type: Number, default: 0 },
-      rating: {
-        average: { type: Number, default: 0, min: 0, max: 5 },
-        count: { type: Number, default: 0 }
-      }
-    },
-    
-    // Company Profile
-    company: {
-      businessRegNo: String,
-      tinNumber: String,
-      drivers: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      }],
-      totalDrivers: { type: Number, default: 0 },
-      totalRides: { type: Number, default: 0 },
-      totalEarnings: { type: Number, default: 0 }
-    },
-    
-    // Admin Profile
-    admin: {
-      firstName: String,
-      lastName: String,
-      permissions: [String],
-      lastLogin: Date
-    }
+  isVerified: {
+    type: Boolean,
+    default: false
   },
   
-  // Verification Status
-  isVerified: { type: Boolean, default: false },
-  verificationStatus: {
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  
+  // SMS OTP verification
+  otpCode: {
     type: String,
-    enum: ['pending', 'approved', 'rejected'],
-    default: 'pending'
+    select: false
   },
   
-  // Phone Verification
-  phoneVerified: { type: Boolean, default: false },
-  phoneVerificationCode: { type: String, select: false },
-  phoneVerificationExpires: { type: Date, select: false },
-  
-  // Account Status
-  isActive: { type: Boolean, default: true },
-  isBlocked: { type: Boolean, default: false },
-  
-  // Referral System
-  referralCode: {
-    type: String,
-    unique: true,
-    sparse: true,
-    uppercase: true
+  otpExpires: {
+    type: Date,
+    select: false
   },
   
-  // Metadata
+  otpVerified: {
+    type: Boolean,
+    default: false
+  },
+  
   lastLogin: Date,
-  loginAttempts: { type: Number, default: 0 },
-  lockUntil: Date
-
+  
+  // Security tracking
+  loginAttempts: {
+    type: Number,
+    default: 0
+  },
+  
+  lockUntil: Date,
+  
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
 }, {
   timestamps: true,
-  toJSON: { virtuals: true },
+  toJSON: { 
+    virtuals: true,
+    transform: function(doc, ret) {
+      delete ret.password;
+      delete ret.otpCode;
+      delete ret.otpExpires;
+      delete ret.loginAttempts;
+      delete ret.lockUntil;
+      return ret;
+    }
+  },
   toObject: { virtuals: true }
 });
 
 // Indexes for performance
 userSchema.index({ email: 1 });
 userSchema.index({ phone: 1 });
-userSchema.index({ role: 1 });
-userSchema.index({ referralCode: 1 });
-userSchema.index({ 'profile.driver.currentLocation': '2dsphere' });
-userSchema.index({ verificationStatus: 1 });
+userSchema.index({ roles: 1 });
+userSchema.index({ isVerified: 1, isActive: 1 });
+userSchema.index({ rating: -1 });
 
-// Virtual for full name
-userSchema.virtual('fullName').get(function() {
-  const profile = this.profile[this.role];
-  if (profile && profile.firstName && profile.lastName) {
-    return `${profile.firstName} ${profile.lastName}`;
-  }
-  return this.email;
+// Virtual for account lock status
+userSchema.virtual('isLocked').get(function() {
+  return !!(this.lockUntil && this.lockUntil > Date.now());
+});
+
+// Virtual for driver profile (populated separately)
+userSchema.virtual('driverProfile', {
+  ref: 'DriverProfile',
+  localField: '_id',
+  foreignField: 'userId',
+  justOne: true
 });
 
 // Pre-save middleware to hash password
 userSchema.pre('save', async function(next) {
+  // Only hash the password if it has been modified (or is new)
   if (!this.isModified('password')) return next();
   
   try {
+    // Hash password with cost of 12
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
     next();
@@ -164,63 +143,132 @@ userSchema.pre('save', async function(next) {
   }
 });
 
-// Pre-save middleware to generate referral code
+// Pre-save middleware to update timestamps
 userSchema.pre('save', function(next) {
-  if ((this.role === 'driver' || this.role === 'company') && !this.referralCode) {
-    const prefix = this.role === 'driver' ? 'DRV' : 'CMP';
-    const randomString = Math.random().toString(36).substring(2, 8).toUpperCase();
-    this.referralCode = `${prefix}${randomString}`;
-  }
+  this.updatedAt = Date.now();
   next();
 });
 
-// Method to compare password
+// Instance method to check password
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  if (!this.password) return false;
-  return await bcrypt.compare(candidatePassword, this.password);
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (error) {
+    throw new Error('Password comparison failed');
+  }
 };
 
-// Method to generate phone verification code
-userSchema.methods.generatePhoneVerificationCode = function() {
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-  this.phoneVerificationCode = code;
-  this.phoneVerificationExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-  return code;
+// Instance method to check if user has specific role
+userSchema.methods.hasRole = function(role) {
+  return this.roles.includes(role);
 };
 
-// Method to update driver location
-userSchema.methods.updateLocation = function(longitude, latitude) {
-  if (this.role !== 'driver') {
-    throw new Error('Only drivers can update location');
+// Instance method to add role
+userSchema.methods.addRole = function(role) {
+  if (!this.roles.includes(role)) {
+    this.roles.push(role);
+  }
+  return this;
+};
+
+// Instance method to remove role
+userSchema.methods.removeRole = function(role) {
+  this.roles = this.roles.filter(r => r !== role);
+  return this;
+};
+
+// Instance method to handle failed login attempts
+userSchema.methods.incLoginAttempts = function() {
+  // If we have a previous lock that has expired, restart at 1
+  if (this.lockUntil && this.lockUntil < Date.now()) {
+    return this.updateOne({
+      $unset: { lockUntil: 1 },
+      $set: { loginAttempts: 1 }
+    });
   }
   
-  this.profile.driver.currentLocation = {
-    type: 'Point',
-    coordinates: [longitude, latitude]
-  };
+  const updates = { $inc: { loginAttempts: 1 } };
   
-  return this.save();
+  // Lock account after 5 failed attempts for 2 hours
+  if (this.loginAttempts + 1 >= 5 && !this.isLocked) {
+    updates.$set = { lockUntil: Date.now() + 2 * 60 * 60 * 1000 }; // 2 hours
+  }
+  
+  return this.updateOne(updates);
 };
 
-// Static method to find nearby drivers
-userSchema.statics.findNearbyDrivers = function(longitude, latitude, maxDistance = 5000) {
-  return this.find({
-    role: 'driver',
-    'profile.driver.isAvailable': true,
-    isActive: true,
-    isBlocked: false,
-    verificationStatus: 'approved',
-    'profile.driver.currentLocation': {
-      $near: {
-        $geometry: {
-          type: 'Point',
-          coordinates: [longitude, latitude]
-        },
-        $maxDistance: maxDistance
-      }
-    }
+// Instance method to reset login attempts
+userSchema.methods.resetLoginAttempts = function() {
+  return this.updateOne({
+    $unset: { loginAttempts: 1, lockUntil: 1 }
   });
 };
 
-module.exports = mongoose.model('User', userSchema);
+// Instance method to generate OTP
+userSchema.methods.generateOTP = function() {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  this.otpCode = otp;
+  this.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  return otp;
+};
 
+// Instance method to verify OTP
+userSchema.methods.verifyOTP = function(otp) {
+  if (!this.otpCode || !this.otpExpires) {
+    return false;
+  }
+  
+  if (this.otpExpires < new Date()) {
+    return false;
+  }
+  
+  if (this.otpCode !== otp) {
+    return false;
+  }
+  
+  this.otpVerified = true;
+  this.isVerified = true;
+  this.otpCode = undefined;
+  this.otpExpires = undefined;
+  
+  return true;
+};
+
+// Static method to find users by role
+userSchema.statics.findByRole = function(role) {
+  return this.find({ roles: role, isActive: true, isVerified: true });
+};
+
+// Static method to find verified users
+userSchema.statics.findVerified = function() {
+  return this.find({ isVerified: true, isActive: true });
+};
+
+// Static method to find available dispatchers
+userSchema.statics.findAvailableDispatchers = function() {
+  return this.find({ 
+    roles: 'DISPATCHER', 
+    isActive: true, 
+    isVerified: true 
+  }).select('name email phone');
+};
+
+// Static method to find active drivers
+userSchema.statics.findActiveDrivers = function() {
+  return this.find({ 
+    roles: 'DRIVER', 
+    isActive: true, 
+    isVerified: true 
+  }).populate('driverProfile');
+};
+
+// Static method to find owners
+userSchema.statics.findOwners = function() {
+  return this.find({ 
+    roles: 'OWNER', 
+    isActive: true, 
+    isVerified: true 
+  }).select('name email phone');
+};
+
+module.exports = mongoose.model('User', userSchema);

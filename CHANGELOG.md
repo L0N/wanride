@@ -1,9 +1,71 @@
 # Changelog
 
-All notable changes to WanRides will be documented in this file.
+All notable changes to WanRide Private Fleet System will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.0.0] - 2026-01-28
+
+### Changed - BREAKING CHANGES
+- **COMPLETE ARCHITECTURE REDESIGN**: Transformed from open marketplace model to private fleet management system
+- **Business Model**: Changed from driver-owned vehicles to company-owned fleet only
+- **User Roles**: Replaced Client/Driver/Company/Admin with Passenger/Driver/Dispatcher/Owner roles
+- **Payment System**: Implemented cash-based payments with K5 rounding (Papua New Guinea Kina)
+- **Dispatch System**: Added centralized dispatcher control with manual assignment capabilities
+- **Driver Management**: Implemented employee lifecycle (APPLIED → VERIFIED → ASSIGNED_VEHICLE → ACTIVE)
+- **Fleet Management**: Added company vehicle assignment and tracking system
+- **Commission System**: Replaced referral system with rating-based commission structure (15%-30%)
+
+### Added
+- **Private Fleet Architecture**: Complete fleet management system for company-owned vehicles
+- **Dispatcher Dashboard**: Real-time fleet monitoring and manual ride assignment
+- **Owner Dashboard**: Financial reporting, driver performance, and fleet analytics
+- **Cash Payment System**: K5-rounded fares with cash collection tracking and reconciliation
+- **Commission Calculator**: Rating-based driver commission system with weekly payroll
+- **SOS Alert System**: Emergency alerts with real-time dispatcher notifications
+- **Privacy Features**: Phone number masking with system-routed calling
+- **Fleet Tracking**: Live GPS tracking for all company vehicles
+- **Driver Employee System**: Complete employee lifecycle management
+- **Vehicle Assignment**: Mandatory vehicle assignment before drivers can go online
+- **Receipt System**: Automated receipt generation and email delivery
+- **Variance Tracking**: Expected vs actual cash collection monitoring
+
+### Removed - BREAKING CHANGES
+- **Referral System**: Removed 0.25% profit sharing and referral codes
+- **Driver Vehicle Ownership**: Removed ability for drivers to use personal vehicles
+- **Open Marketplace Features**: Removed public driver registration and marketplace functionality
+- **Company Role**: Removed separate company role (integrated into Owner role)
+
+### Technical Changes
+- **Database Schema**: Complete redesign with User, DriverProfile, Vehicle, Ride, WalletLedger models
+- **Authentication**: Rebuilt with role-based access for four specific roles
+- **Real-time Engine**: Enhanced Socket.io implementation for dispatcher-centric operations
+- **API Architecture**: Redesigned RESTful APIs for private fleet operations
+- **Frontend**: Progressive Web App optimized for Port Moresby operations
+
+## [1.0.0] - 2026-01-27 (Baseline)
+
+### Initial State (Open Marketplace Model)
+- Multi-role authentication system (Client, Driver, Company, Admin)
+- Driver-owned vehicle marketplace model
+- Referral system with 0.25% profit sharing for 12 months
+- Phone/OTP verification with Twilio integration
+- Document upload and verification workflow
+- Real-time ride tracking and communication
+- MERN stack foundation with Socket.io
+- MongoDB database with basic schemas
+- React frontend with role-based access
+- Express.js backend with security middleware
+
+### Infrastructure (Preserved)
+- MERN stack architecture (MongoDB, Express.js, React, Node.js)
+- Socket.io real-time communication
+- JWT authentication foundation
+- Twilio SMS integration
+- Cloudinary file upload
+- Winston logging system
+- Security middleware (Helmet, CORS, Rate limiting)
 
 ## [Unreleased]
 
