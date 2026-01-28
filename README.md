@@ -281,16 +281,17 @@ services:
 
 ## 📋 Development Phases
 
-- [x] **Phase 1**: Project Setup & Infrastructure
-- [ ] **Phase 2**: Database Models & Schemas
-- [ ] **Phase 3**: Authentication System
-- [ ] **Phase 4**: Document Upload & Verification
-- [ ] **Phase 5**: Referral System
-- [ ] **Phase 6**: Ride Management
-- [ ] **Phase 7**: Real-time Communication
-- [ ] **Phase 8**: Admin Dashboard
-- [ ] **Phase 9**: React Frontend Foundation
-- [ ] **Phase 10**: UI Components & Deployment
+- [x] **Phase 1**: Database Models & Private Fleet Architecture
+- [x] **Phase 2**: Authentication System with SMS OTP
+- [x] **Phase 2.1**: Contact Integration & Email Service (v2.1.0)
+- [ ] **Phase 3**: Real-time Dispatch Engine (Socket.io)
+- [ ] **Phase 4**: Fleet Management APIs
+- [ ] **Phase 5**: Progressive Web App (PWA)
+- [ ] **Phase 6**: Dispatcher Dashboard
+- [ ] **Phase 7**: Driver Mobile Interface
+- [ ] **Phase 8**: Owner Analytics & Reports
+- [ ] **Phase 9**: Payment & Commission System
+- [ ] **Phase 10**: Production Deployment
 
 ## 🧪 Testing
 
@@ -332,8 +333,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-For support, email support@wanrides.com or join our Slack channel.
+For support and inquiries, contact us at **frank@wantekpng.com**
+
+**Business Contact**: WanTek PNG  
+**Email**: frank@wantekpng.com  
+**Location**: Port Moresby, Papua New Guinea
 
 ---
 
-**WanRides Team** - Building the future of ride-hailing 🚗💨
+**WanTek PNG** - Reliable Transport Solutions for Papua New Guinea 🚗🇵🇬

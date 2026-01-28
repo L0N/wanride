@@ -5,6 +5,29 @@ All notable changes to WanRide Private Fleet System will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-01-28
+
+### Added
+- **Email Service Integration**: Professional email templates for receipts, driver welcome, and system notifications
+- **Official Contact Information**: frank@wantekpng.com integrated throughout the system
+- **Enhanced SMS Templates**: All SMS messages now include support contact information
+- **Professional Email Templates**: HTML and text versions for ride receipts and driver onboarding
+- **Business Branding**: WanTek PNG branding with official contact information
+
+### Changed
+- **JWT Issuer**: Updated to "wanride-fleet-wantekpng" for proper business identification
+- **SMS Messages**: All OTP, welcome, and emergency messages include frank@wantekpng.com
+- **Environment Configuration**: Added official contact variables (SUPPORT_EMAIL, BUSINESS_NAME, BUSINESS_CONTACT)
+- **Package Metadata**: Updated author and contact information to WanTek PNG
+- **Error Messages**: Account lockout messages include support contact information
+
+### Technical
+- Added nodemailer dependency for email functionality
+- Email service supports both production SMTP and development mock mode
+- Professional email templates with responsive design
+- Contact information centralized via environment variables
+- Enhanced driver onboarding with both SMS and email welcome messages
+
 ## [2.0.0] - 2026-01-28
 
 ### Changed - BREAKING CHANGES

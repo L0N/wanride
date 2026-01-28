@@ -26,7 +26,7 @@ class JWTService {
 
     return jwt.sign(payload, this.accessTokenSecret, {
       expiresIn: this.accessTokenExpiry,
-      issuer: 'wanride-fleet',
+      issuer: 'wanride-fleet-wantekpng',
       audience: 'wanride-users'
     });
   }
@@ -43,7 +43,7 @@ class JWTService {
 
     return jwt.sign(payload, this.refreshTokenSecret, {
       expiresIn: this.refreshTokenExpiry,
-      issuer: 'wanride-fleet',
+      issuer: 'wanride-fleet-wantekpng',
       audience: 'wanride-users'
     });
   }
@@ -117,7 +117,7 @@ class JWTService {
 
     return jwt.sign(payload, this.accessTokenSecret, {
       expiresIn: '10m', // OTP tokens expire in 10 minutes
-      issuer: 'wanride-fleet',
+      issuer: 'wanride-fleet-wantekpng',
       audience: 'wanride-otp'
     });
   }
