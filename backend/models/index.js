@@ -3,30 +3,27 @@
 
 const User = require('./User');
 const DriverProfile = require('./DriverProfile');
+const DriverLocation = require('./DriverLocation');
 const Vehicle = require('./Vehicle');
 const Ride = require('./Ride');
+const RideRequest = require('./RideRequest');
+const DispatchLog = require('./DispatchLog');
 const WalletLedger = require('./WalletLedger');
 
 module.exports = {
   User,
   DriverProfile,
+  DriverLocation,
   Vehicle,
   Ride,
+  RideRequest,
+  DispatchLog,
   WalletLedger
-};
-
-// Alternative individual exports for convenience
-module.exports.models = {
-  User,
-  Ride,
-  Referral,
-  Document,
-  Session
 };
 
 // Model validation helper
 module.exports.validateModels = () => {
-  const models = [User, Ride, Referral, Document, Session];
+  const models = [User, DriverProfile, DriverLocation, Vehicle, Ride, RideRequest, DispatchLog, WalletLedger];
   const results = {};
   
   models.forEach(Model => {
@@ -64,25 +61,39 @@ module.exports.validateModels = () => {
 module.exports.getRelationships = () => {
   return {
     User: {
-      hasMany: ['Ride', 'Document', 'Session', 'Referral'],
-      references: ['Referral.referrer', 'Ride.client', 'Ride.driver', 'Document.owner', 'Session.user']
+      hasMany: ['Ride', 'RideRequest', 'DriverProfile', 'WalletLedger'],
+      references: ['Ride.passengerId', 'Ride.driverId', 'RideRequest.passengerId', 'RideRequest.driverId']
+    },
+    DriverProfile: {
+      belongsTo: ['User', 'Vehicle'],
+      hasMany: ['DriverLocation', 'Ride', 'RideRequest'],
+      references: ['User.userId', 'Vehicle.assignedVehicleId']
+    },
+    DriverLocation: {
+      belongsTo: ['DriverProfile'],
+      references: ['DriverProfile.userId']
+    },
+    Vehicle: {
+      hasMany: ['DriverProfile', 'Ride', 'RideRequest'],
+      references: ['DriverProfile.assignedVehicleId', 'Ride.vehicleId', 'RideRequest.vehicleId']
     },
     Ride: {
-      belongsTo: ['User'],
-      references: ['User.client', 'User.driver', 'Referral.referrer']
+      belongsTo: ['User', 'Vehicle'],
+      hasMany: ['WalletLedger'],
+      references: ['User.passengerId', 'User.driverId', 'Vehicle.vehicleId']
     },
-    Referral: {
-      belongsTo: ['User'],
-      hasMany: ['User'],
-      references: ['User.referrer', 'User.appliedBy.user']
+    RideRequest: {
+      belongsTo: ['User', 'Vehicle'],
+      hasMany: ['DispatchLog'],
+      references: ['User.passengerId', 'User.driverId', 'Vehicle.vehicleId']
     },
-    Document: {
-      belongsTo: ['User'],
-      references: ['User.owner', 'User.verifiedBy']
+    DispatchLog: {
+      belongsTo: ['RideRequest', 'User'],
+      references: ['RideRequest.rideRequestId', 'User.dispatcherId']
     },
-    Session: {
-      belongsTo: ['User'],
-      references: ['User.user', 'User.revokedBy']
+    WalletLedger: {
+      belongsTo: ['User', 'Ride'],
+      references: ['User.userId', 'Ride.rideId']
     }
   };
 };
