@@ -1,15 +1,14 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
-const app = require('../server');
+const { app } = require('../server');
 const User = require('../models/User');
-const JWTService = require('../utils/jwt');
+const jwtService = require('../utils/jwt');
 
 // Test database
 const MONGODB_TEST_URI = process.env.MONGODB_TEST_URI || 'mongodb://localhost:27017/wanride_fleet_test';
 
 describe('Authentication System', () => {
   let server;
-  const jwtService = new JWTService();
 
   beforeAll(async () => {
     // Connect to test database

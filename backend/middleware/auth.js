@@ -269,6 +269,34 @@ const authRateLimit = (req, res, next) => {
 };
 
 /**
+ * Generic authorization middleware that accepts an array of allowed roles
+ * @param {Array} allowedRoles - Array of roles that are allowed to access the route
+ * @returns {Function} Express middleware function
+ */
+const authorize = (allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'You must be logged in to access this resource'
+      });
+    }
+
+    const userRoles = req.user.roles || [];
+    const hasPermission = allowedRoles.some(role => userRoles.includes(role));
+
+    if (!hasPermission) {
+      return res.status(403).json({
+        error: 'Access denied',
+        message: `Access restricted to: ${allowedRoles.join(', ')}`
+      });
+    }
+
+    next();
+  };
+};
+
+/**
  * Middleware to log authentication events
  */
 const logAuthEvent = (event) => {
@@ -299,6 +327,7 @@ const logAuthEvent = (event) => {
 
 module.exports = {
   authenticate,
+  authorize,
   requireRole,
   requireAnyRole,
   requireVerified,
