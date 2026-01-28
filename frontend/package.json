@@ -1,7 +1,7 @@
 {
   "name": "wanrides-frontend",
-  "version": "1.0.0",
-  "description": "WanRides MVP - Frontend React application for ride-hailing",
+  "version": "2.1.0",
+  "description": "WanRide Private Fleet System - Frontend React PWA for company-owned vehicle fleet management",
   "private": true,
   "dependencies": {
     "react": "^18.2.0",
