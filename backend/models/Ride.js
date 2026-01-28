@@ -1,126 +1,226 @@
 const mongoose = require('mongoose');
 
 const rideSchema = new mongoose.Schema({
-  // Participants
-  client: {
+  // Core Ride Information - Private Fleet Model
+  passengerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'Client is required']
+    required: [true, 'Passenger is required']
   },
   
-  driver: {
+  driverId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'DriverProfile',
+    required: [true, 'Driver is required']
+  },
+  
+  vehicleId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vehicle',
+    required: [true, 'Vehicle is required']
+  },
+  
+  // Dispatcher who assigned the ride
+  dispatcherId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    default: null
+    default: null // null for auto-assigned rides
   },
   
-  // Ride Status Flow as specified
+  // Ride Status Management - Private Fleet Workflow
   status: {
     type: String,
     enum: [
-      'requested',      // Client has requested a ride
-      'accepted',       // Driver has accepted the ride
-      'driver-en-route', // Driver is on the way to pickup
-      'in-progress',    // Ride is in progress
-      'completed',      // Ride completed successfully
-      'cancelled'       // Ride was cancelled
+      'REQUESTED',    // Passenger has requested a ride
+      'ASSIGNED',     // Dispatcher has assigned driver
+      'ARRIVED',      // Driver has arrived at pickup
+      'IN_PROGRESS',  // Ride is in progress
+      'COMPLETED',    // Ride completed successfully
+      'CANCELLED'     // Ride was cancelled
     ],
-    default: 'requested',
+    default: 'REQUESTED',
     required: true
   },
   
   // Location Information
-  pickup: {
-    address: { type: String, required: true, trim: true },
+  pickupLocation: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
     coordinates: {
-      type: { type: String, enum: ['Point'], default: 'Point' },
-      coordinates: { type: [Number], required: true }
+      type: [Number], // [longitude, latitude]
+      required: [true, 'Pickup coordinates are required']
+    },
+    address: {
+      type: String,
+      required: [true, 'Pickup address is required']
     }
   },
   
-  destination: {
-    address: { type: String, required: true, trim: true },
+  dropoffLocation: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
     coordinates: {
-      type: { type: String, enum: ['Point'], default: 'Point' },
-      coordinates: { type: [Number], required: true }
+      type: [Number], // [longitude, latitude]
+      required: [true, 'Dropoff coordinates are required']
+    },
+    address: {
+      type: String,
+      required: [true, 'Dropoff address is required']
     }
   },
   
-  // Distance and Duration
-  estimatedDistance: { type: Number, required: true, min: 0 },
-  actualDistance: { type: Number, min: 0 },
-  estimatedDuration: { type: Number, required: true, min: 0 },
-  actualDuration: { type: Number, min: 0 },
-  
-  // Pricing and Profit Calculation
-  baseFare: { type: Number, required: true, min: 0 },
-  distanceFare: { type: Number, required: true, min: 0 },
-  timeFare: { type: Number, default: 0, min: 0 },
-  totalFare: { type: Number, required: true, min: 0 },
-  
-  // Profit Calculation as specified
-  operationalCostPercentage: { type: Number, default: 20, min: 0, max: 100 },
-  profit: { type: Number, default: 0 },
-  
-  // Referral Earnings (0.25% of profit for one year)
-  referralEarnings: {
-    amount: { type: Number, default: 0 },
-    referralCode: String,
-    referrer: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }
+  // Distance and Fare - Cash-based with K5 rounding
+  distance: {
+    type: Number, // in kilometers
+    required: [true, 'Distance is required'],
+    min: [0, 'Distance cannot be negative']
   },
   
-  // Driver Earnings
-  driverEarnings: { type: Number, default: 0 },
-  
-  // Payment Information
-  paymentMethod: {
-    type: String,
-    enum: ['cash', 'card', 'mobile-money', 'wallet'],
-    required: true
+  fare: {
+    type: Number, // Rounded to nearest K5
+    required: [true, 'Fare is required'],
+    min: [5, 'Minimum fare is K5']
   },
   
-  paymentStatus: {
-    type: String,
-    enum: ['pending', 'completed', 'failed', 'refunded'],
-    default: 'pending'
+  // Cash Payment Tracking
+  paidAmount: {
+    type: Number,
+    default: 0,
+    min: [0, 'Paid amount cannot be negative']
+  },
+  
+  paymentConfirmed: {
+    type: Boolean,
+    default: false
+  },
+  
+  paymentConfirmedBy: {
+    passenger: { type: Boolean, default: false },
+    driver: { type: Boolean, default: false }
+  },
+  
+  // Commission and Earnings
+  driverCommission: {
+    type: Number,
+    default: 0,
+    min: [0, 'Driver commission cannot be negative']
+  },
+  
+  commissionRate: {
+    type: Number,
+    min: [0.15, 'Commission rate cannot be less than 15%'],
+    max: [0.30, 'Commission rate cannot be more than 30%'],
+    default: 0.15
   },
   
   // Timestamps for ride lifecycle
-  requestedAt: { type: Date, default: Date.now },
-  acceptedAt: Date,
-  driverEnRouteAt: Date,
-  rideStartedAt: Date,
-  rideCompletedAt: Date,
-  cancelledAt: Date,
-  
-  // Rating and Feedback
-  clientRating: {
-    rating: { type: Number, min: 1, max: 5 },
-    feedback: String,
-    ratedAt: Date
+  timestamps: {
+    requested: {
+      type: Date,
+      default: Date.now
+    },
+    assigned: Date,
+    arrived: Date,
+    started: Date,
+    completed: Date,
+    cancelled: Date
   },
   
-  driverRating: {
-    rating: { type: Number, min: 1, max: 5 },
-    feedback: String,
-    ratedAt: Date
+  // Duration tracking
+  duration: {
+    estimatedMinutes: Number,
+    actualMinutes: Number,
+    waitingTimeMinutes: { type: Number, default: 0 }
   },
   
-  // Route Tracking
-  route: [{
-    coordinates: { type: [Number], required: true },
-    timestamp: { type: Date, default: Date.now },
-    speed: Number,
-    heading: Number
-  }],
+  // Rating System
+  rating: {
+    passengerRating: {
+      score: { type: Number, min: 1, max: 5 },
+      comment: String,
+      timestamp: Date
+    },
+    driverRating: {
+      score: { type: Number, min: 1, max: 5 },
+      comment: String,
+      timestamp: Date
+    }
+  },
   
-  // Metadata
-  notes: String,
-  isDisputed: { type: Boolean, default: false },
-  isEmergency: { type: Boolean, default: false }
+  // Cancellation Information
+  cancellation: {
+    cancelledBy: {
+      type: String,
+      enum: ['PASSENGER', 'DRIVER', 'DISPATCHER', 'SYSTEM']
+    },
+    reason: String,
+    timestamp: Date
+  },
+  
+  // Special Features
+  specialRequests: [String],
+  
+  // SOS and Safety
+  sosTriggered: {
+    type: Boolean,
+    default: false
+  },
+  
+  sosDetails: {
+    triggeredBy: {
+      type: String,
+      enum: ['PASSENGER', 'DRIVER']
+    },
+    timestamp: Date,
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: [Number]
+    },
+    resolved: {
+      type: Boolean,
+      default: false
+    },
+    resolvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    resolvedAt: Date
+  },
+  
+  // Receipt Information
+  receipt: {
+    generated: {
+      type: Boolean,
+      default: false
+    },
+    emailSent: {
+      type: Boolean,
+      default: false
+    },
+    receiptNumber: String,
+    generatedAt: Date
+  },
+  
+  // System tracking
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  
+  lastUpdatedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }
 
 }, {
   timestamps: true,
@@ -128,56 +228,114 @@ const rideSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Indexes for performance
-rideSchema.index({ client: 1, createdAt: -1 });
-rideSchema.index({ driver: 1, createdAt: -1 });
-rideSchema.index({ status: 1 });
-rideSchema.index({ 'pickup.coordinates': '2dsphere' });
-rideSchema.index({ 'destination.coordinates': '2dsphere' });
-rideSchema.index({ requestedAt: -1 });
-rideSchema.index({ 'referralEarnings.referrer': 1 });
+// Geospatial indexes for location queries
+rideSchema.index({ pickupLocation: '2dsphere' });
+rideSchema.index({ dropoffLocation: '2dsphere' });
 
-// Virtual for ride duration
-rideSchema.virtual('rideDuration').get(function() {
-  if (this.rideStartedAt && this.rideCompletedAt) {
-    return Math.round((this.rideCompletedAt - this.rideStartedAt) / (1000 * 60));
+// Indexes for performance
+rideSchema.index({ passengerId: 1 });
+rideSchema.index({ driverId: 1 });
+rideSchema.index({ vehicleId: 1 });
+rideSchema.index({ dispatcherId: 1 });
+rideSchema.index({ status: 1 });
+rideSchema.index({ 'timestamps.requested': -1 });
+rideSchema.index({ sosTriggered: 1 });
+
+// Compound indexes for common queries
+rideSchema.index({ passengerId: 1, status: 1 });
+rideSchema.index({ driverId: 1, status: 1 });
+rideSchema.index({ status: 1, 'timestamps.requested': -1 });
+rideSchema.index({ dispatcherId: 1, status: 1 });
+
+// Virtual for passenger details
+rideSchema.virtual('passenger', {
+  ref: 'User',
+  localField: 'passengerId',
+  foreignField: '_id',
+  justOne: true
+});
+
+// Virtual for driver details
+rideSchema.virtual('driver', {
+  ref: 'DriverProfile',
+  localField: 'driverId',
+  foreignField: '_id',
+  justOne: true
+});
+
+// Virtual for vehicle details
+rideSchema.virtual('vehicle', {
+  ref: 'Vehicle',
+  localField: 'vehicleId',
+  foreignField: '_id',
+  justOne: true
+});
+
+// Virtual for dispatcher details
+rideSchema.virtual('dispatcher', {
+  ref: 'User',
+  localField: 'dispatcherId',
+  foreignField: '_id',
+  justOne: true
+});
+
+// Virtual for ride duration in minutes
+rideSchema.virtual('rideDurationMinutes').get(function() {
+  if (this.timestamps.completed && this.timestamps.started) {
+    return Math.round((this.timestamps.completed - this.timestamps.started) / (1000 * 60));
   }
   return null;
 });
 
-// Pre-save middleware to calculate profit and earnings
-rideSchema.pre('save', function(next) {
-  // Calculate profit: Profit = Ride Fare - (Operational Cost %)
-  if (this.totalFare && this.operationalCostPercentage) {
-    this.profit = this.totalFare * (1 - this.operationalCostPercentage / 100);
+// Virtual for total trip time (from request to completion)
+rideSchema.virtual('totalTripTime').get(function() {
+  if (this.timestamps.completed && this.timestamps.requested) {
+    return Math.round((this.timestamps.completed - this.timestamps.requested) / (1000 * 60));
   }
-  
-  // Calculate referral earnings (0.25% of profit)
-  if (this.profit && this.referralEarnings.referrer) {
-    this.referralEarnings.amount = this.profit * 0.0025;
-  }
-  
-  // Calculate driver earnings (profit minus referral earnings)
-  if (this.profit) {
-    let driverShare = this.profit;
-    if (this.referralEarnings.amount) {
-      driverShare -= this.referralEarnings.amount;
-    }
-    this.driverEarnings = Math.max(0, driverShare);
-  }
-  
-  next();
+  return null;
 });
 
-// Method to update ride status with timestamp
-rideSchema.methods.updateStatus = function(newStatus, userId = null) {
+// Virtual for cash variance (expected vs actual)
+rideSchema.virtual('cashVariance').get(function() {
+  return this.paidAmount - this.fare;
+});
+
+// Pre-save middleware to calculate commission and round fare
+rideSchema.pre('save', async function(next) {
+  try {
+    // Round fare to nearest K5
+    if (this.isModified('fare')) {
+      this.fare = Math.round(this.fare / 5) * 5;
+      if (this.fare < 5) this.fare = 5; // Minimum fare K5
+    }
+    
+    // Calculate driver commission based on rating
+    if (this.isModified('fare') || this.isModified('commissionRate')) {
+      this.driverCommission = this.fare * this.commissionRate;
+    }
+    
+    // Generate receipt number if completed
+    if (this.status === 'COMPLETED' && !this.receipt.receiptNumber) {
+      this.receipt.receiptNumber = `WR${Date.now()}${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+      this.receipt.generated = true;
+      this.receipt.generatedAt = new Date();
+    }
+    
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Instance method to update ride status
+rideSchema.methods.updateStatus = function(newStatus, updatedBy) {
   const validTransitions = {
-    'requested': ['accepted', 'cancelled'],
-    'accepted': ['driver-en-route', 'cancelled'],
-    'driver-en-route': ['in-progress', 'cancelled'],
-    'in-progress': ['completed', 'cancelled'],
-    'completed': [],
-    'cancelled': []
+    'REQUESTED': ['ASSIGNED', 'CANCELLED'],
+    'ASSIGNED': ['ARRIVED', 'CANCELLED'],
+    'ARRIVED': ['IN_PROGRESS', 'CANCELLED'],
+    'IN_PROGRESS': ['COMPLETED', 'CANCELLED'],
+    'COMPLETED': [], // Terminal state
+    'CANCELLED': []  // Terminal state
   };
   
   if (!validTransitions[this.status].includes(newStatus)) {
@@ -185,86 +343,207 @@ rideSchema.methods.updateStatus = function(newStatus, userId = null) {
   }
   
   this.status = newStatus;
+  this.lastUpdatedBy = updatedBy;
   
-  // Set appropriate timestamp
+  // Update timestamps
   const now = new Date();
   switch (newStatus) {
-    case 'accepted':
-      this.acceptedAt = now;
+    case 'ASSIGNED':
+      this.timestamps.assigned = now;
       break;
-    case 'driver-en-route':
-      this.driverEnRouteAt = now;
+    case 'ARRIVED':
+      this.timestamps.arrived = now;
       break;
-    case 'in-progress':
-      this.rideStartedAt = now;
+    case 'IN_PROGRESS':
+      this.timestamps.started = now;
       break;
-    case 'completed':
-      this.rideCompletedAt = now;
-      this.paymentStatus = 'completed';
+    case 'COMPLETED':
+      this.timestamps.completed = now;
+      this.duration.actualMinutes = this.rideDurationMinutes;
       break;
-    case 'cancelled':
-      this.cancelledAt = now;
+    case 'CANCELLED':
+      this.timestamps.cancelled = now;
       break;
   }
   
   return this.save();
 };
 
-// Method to add route point
-rideSchema.methods.addRoutePoint = function(longitude, latitude, speed = null, heading = null) {
-  this.route.push({
-    coordinates: [longitude, latitude],
-    timestamp: new Date(),
-    speed,
-    heading
-  });
+// Instance method to assign driver
+rideSchema.methods.assignDriver = function(driverId, vehicleId, dispatcherId) {
+  if (this.status !== 'REQUESTED') {
+    throw new Error('Can only assign driver to requested rides');
+  }
+  
+  this.driverId = driverId;
+  this.vehicleId = vehicleId;
+  this.dispatcherId = dispatcherId;
+  this.status = 'ASSIGNED';
+  this.timestamps.assigned = new Date();
+  this.lastUpdatedBy = dispatcherId;
   
   return this.save();
 };
 
-// Static method to calculate fare
-rideSchema.statics.calculateFare = function(distance, duration, surgeMultiplier = 1) {
-  const baseFare = 50; // Base fare
-  const perKmRate = 25; // Rate per kilometer
-  const perMinuteRate = 2; // Rate per minute
+// Instance method to cancel ride
+rideSchema.methods.cancelRide = function(cancelledBy, reason) {
+  if (this.status === 'COMPLETED' || this.status === 'CANCELLED') {
+    throw new Error('Cannot cancel completed or already cancelled rides');
+  }
   
-  const distanceFare = distance * perKmRate;
-  const timeFare = duration * perMinuteRate;
-  const subtotal = baseFare + distanceFare + timeFare;
-  
-  return {
-    baseFare,
-    distanceFare,
-    timeFare,
-    subtotal,
-    surgeMultiplier,
-    totalFare: Math.round(subtotal * surgeMultiplier)
+  this.status = 'CANCELLED';
+  this.cancellation = {
+    cancelledBy: cancelledBy,
+    reason: reason,
+    timestamp: new Date()
   };
+  this.timestamps.cancelled = new Date();
+  
+  return this.save();
 };
 
-// Static method to get ride statistics
-rideSchema.statics.getRideStats = function(startDate, endDate) {
-  const matchStage = {};
-  if (startDate || endDate) {
-    matchStage.createdAt = {};
-    if (startDate) matchStage.createdAt.$gte = new Date(startDate);
-    if (endDate) matchStage.createdAt.$lte = new Date(endDate);
+// Instance method to confirm payment
+rideSchema.methods.confirmPayment = function(amount, confirmedBy) {
+  if (this.status !== 'COMPLETED') {
+    throw new Error('Can only confirm payment for completed rides');
   }
   
+  this.paidAmount = amount;
+  
+  if (confirmedBy === 'PASSENGER') {
+    this.paymentConfirmedBy.passenger = true;
+  } else if (confirmedBy === 'DRIVER') {
+    this.paymentConfirmedBy.driver = true;
+  }
+  
+  // Payment is confirmed when both parties agree
+  this.paymentConfirmed = this.paymentConfirmedBy.passenger && this.paymentConfirmedBy.driver;
+  
+  return this.save();
+};
+
+// Instance method to trigger SOS
+rideSchema.methods.triggerSOS = function(triggeredBy, location) {
+  this.sosTriggered = true;
+  this.sosDetails = {
+    triggeredBy: triggeredBy,
+    timestamp: new Date(),
+    location: {
+      type: 'Point',
+      coordinates: location
+    },
+    resolved: false
+  };
+  
+  return this.save();
+};
+
+// Instance method to resolve SOS
+rideSchema.methods.resolveSOS = function(resolvedBy) {
+  if (!this.sosTriggered) {
+    throw new Error('No SOS to resolve');
+  }
+  
+  this.sosDetails.resolved = true;
+  this.sosDetails.resolvedBy = resolvedBy;
+  this.sosDetails.resolvedAt = new Date();
+  
+  return this.save();
+};
+
+// Instance method to add rating
+rideSchema.methods.addRating = function(ratingType, score, comment, ratedBy) {
+  if (this.status !== 'COMPLETED') {
+    throw new Error('Can only rate completed rides');
+  }
+  
+  const ratingData = {
+    score: score,
+    comment: comment,
+    timestamp: new Date()
+  };
+  
+  if (ratingType === 'PASSENGER') {
+    if (this.rating.passengerRating.score) {
+      throw new Error('Passenger rating already exists');
+    }
+    this.rating.passengerRating = ratingData;
+  } else if (ratingType === 'DRIVER') {
+    if (this.rating.driverRating.score) {
+      throw new Error('Driver rating already exists');
+    }
+    this.rating.driverRating = ratingData;
+  }
+  
+  this.lastUpdatedBy = ratedBy;
+  
+  return this.save();
+};
+
+// Static method to find rides by status
+rideSchema.statics.findByStatus = function(status) {
+  return this.find({ status: status })
+    .populate('passenger', 'name email phone')
+    .populate('driver')
+    .populate('vehicle')
+    .populate('dispatcher', 'name email')
+    .sort({ 'timestamps.requested': -1 });
+};
+
+// Static method to find active rides for dispatcher
+rideSchema.statics.findActiveRides = function() {
+  return this.find({
+    status: { $in: ['REQUESTED', 'ASSIGNED', 'ARRIVED', 'IN_PROGRESS'] }
+  })
+  .populate('passenger', 'name phone')
+  .populate('driver')
+  .populate('vehicle')
+  .sort({ 'timestamps.requested': -1 });
+};
+
+// Static method to find SOS alerts
+rideSchema.statics.findSOSAlerts = function() {
+  return this.find({
+    sosTriggered: true,
+    'sosDetails.resolved': false
+  })
+  .populate('passenger', 'name phone')
+  .populate('driver')
+  .populate('vehicle')
+  .sort({ 'sosDetails.timestamp': -1 });
+};
+
+// Static method to calculate cash variance report
+rideSchema.statics.getCashVarianceReport = function(startDate, endDate) {
   return this.aggregate([
-    { $match: matchStage },
+    {
+      $match: {
+        status: 'COMPLETED',
+        'timestamps.completed': {
+          $gte: startDate,
+          $lte: endDate
+        }
+      }
+    },
     {
       $group: {
-        _id: '$status',
-        count: { $sum: 1 },
-        totalFare: { $sum: '$totalFare' },
-        totalProfit: { $sum: '$profit' },
-        avgDistance: { $avg: '$actualDistance' },
-        avgDuration: { $avg: '$actualDuration' }
+        _id: '$driverId',
+        totalRides: { $sum: 1 },
+        expectedCash: { $sum: '$fare' },
+        actualCash: { $sum: '$paidAmount' },
+        totalCommission: { $sum: '$driverCommission' },
+        variance: { $sum: { $subtract: ['$paidAmount', '$fare'] } }
+      }
+    },
+    {
+      $lookup: {
+        from: 'driverprofiles',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'driver'
       }
     }
   ]);
 };
 
 module.exports = mongoose.model('Ride', rideSchema);
-

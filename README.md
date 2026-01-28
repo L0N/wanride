@@ -1,21 +1,21 @@
-# 🚗 WanRides MVP
+# 🚗 WanRide Private Fleet System
 
-A comprehensive ride-hailing application built with the MERN stack, featuring multi-role support, real-time tracking, referral system, and document verification.
+A production-ready ride hailing platform for private vehicle fleets in Port Moresby, Papua New Guinea. Built with the MERN stack, this system manages company-owned vehicles with centralized dispatch, real-time tracking, and cash-based payments.
 
-## 🌟 Features
+## 🌟 Core Features
 
-### Core Functionality
-- **Multi-Role Support**: Client, Driver, Company, and Admin roles
-- **Real-Time Tracking**: Live ride tracking with Socket.io
-- **Referral System**: 0.25% profit sharing for one year
-- **Document Verification**: Admin-approved driver/company documents
-- **Secure Authentication**: JWT + Phone/OTP verification with Twilio
+### Private Fleet Management
+- **Company-Owned Vehicles**: All vehicles belong to the company (no driver-owned vehicles)
+- **Employee Drivers**: Drivers are employees, not freelancers
+- **Centralized Dispatch**: Dispatchers control all ride assignments with manual override
+- **Real-Time Fleet Tracking**: Live GPS tracking of all company vehicles
+- **Cash-Based Payments**: K5-rounded fares with cash collection tracking
 
 ### User Roles
-- **👤 Clients**: Request rides, apply referral codes, track rides
-- **🚗 Drivers**: Accept rides, upload documents, earn from referrals
-- **🏢 Companies**: Manage driver fleets, generate referral codes
-- **👨‍💼 Admins**: Verify documents, manage users, system oversight
+- **🧑‍🤝‍🧑 Passengers**: Authenticated users who request rides (no anonymous rides)
+- **🚗 Drivers**: Company employees assigned to specific vehicles
+- **📋 Dispatchers**: Control ride assignments and monitor fleet operations
+- **👨‍💼 Owners**: Manage fleet, view reports, and handle payroll
 
 ## 🏗️ Architecture
 
@@ -117,46 +117,82 @@ REACT_APP_MAPBOX_ACCESS_TOKEN=your_mapbox_token
 
 ## 📊 Database Schema
 
-### User Schema (Multi-Role)
+### User Schema (Role-Based)
 ```javascript
 {
+  id: ObjectId,
+  name: String,
   email: String,
   phone: String,
-  role: ['client', 'driver', 'company', 'admin'],
-  profile: {
-    client: { referralCode: String, appliedReferral: ObjectId },
-    driver: { license: String, documents: [ObjectId], company: ObjectId },
-    company: { businessRegNo: String, tinNumber: String, drivers: [ObjectId] }
-  },
+  roles: ['PASSENGER', 'DRIVER', 'DISPATCHER', 'OWNER'], // Multiple roles allowed
+  rating: Number,
   isVerified: Boolean,
-  verificationStatus: ['pending', 'approved', 'rejected']
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### DriverProfile Schema
+```javascript
+{
+  userId: ObjectId,
+  license: String,
+  status: ['APPLIED', 'VERIFIED', 'ASSIGNED_VEHICLE', 'ACTIVE', 'SUSPENDED', 'TERMINATED'],
+  currentLocation: { lat: Number, lng: Number },
+  assignedVehicleId: ObjectId,
+  isOnline: Boolean,
+  rating: Number,
+  totalRides: Number,
+  totalEarnings: Number,
+  commissionRate: Number // Based on rating: 15%-30%
+}
+```
+
+### Vehicle Schema
+```javascript
+{
+  plate: String,
+  model: String,
+  vin: String,
+  status: ['ACTIVE', 'MAINTENANCE', 'RETIRED'],
+  assignedDriverId: ObjectId,
+  currentLocation: { lat: Number, lng: Number },
+  lastServiceDate: Date
 }
 ```
 
 ### Ride Schema
 ```javascript
 {
-  client: ObjectId,
-  driver: ObjectId,
-  status: ['requested', 'accepted', 'driver-en-route', 'in-progress', 'completed', 'cancelled'],
-  fare: Number,
-  profit: Number,
-  referralEarnings: Number,
-  pickup: { lat: Number, lng: Number, address: String },
-  dropoff: { lat: Number, lng: Number, address: String }
+  passengerId: ObjectId,
+  driverId: ObjectId,
+  vehicleId: ObjectId,
+  pickupLocation: { lat: Number, lng: Number, address: String },
+  dropoffLocation: { lat: Number, lng: Number, address: String },
+  distance: Number,
+  fare: Number, // Rounded to nearest K5
+  status: ['REQUESTED', 'ASSIGNED', 'ARRIVED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
+  paidAmount: Number,
+  dispatcherId: ObjectId, // Who assigned the ride
+  timestamps: {
+    requested: Date,
+    assigned: Date,
+    arrived: Date,
+    started: Date,
+    completed: Date
+  }
 }
 ```
 
-### Referral Schema
+### WalletLedger Schema
 ```javascript
 {
-  code: String,
-  referrer: ObjectId,
-  referrerType: ['driver', 'company'],
-  appliedBy: [{ user: ObjectId, appliedAt: Date }],
-  totalEarnings: Number,
-  isActive: Boolean,
-  expiresAt: Date
+  userId: ObjectId,
+  rideId: ObjectId,
+  amount: Number,
+  type: ['COLLECTED', 'COMMISSION', 'ADJUSTMENT'],
+  description: String,
+  createdAt: Date
 }
 ```
 

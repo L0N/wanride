@@ -2,17 +2,17 @@
 // This provides a clean way to import all models from a single location
 
 const User = require('./User');
+const DriverProfile = require('./DriverProfile');
+const Vehicle = require('./Vehicle');
 const Ride = require('./Ride');
-const Referral = require('./Referral');
-const Document = require('./Document');
-const Session = require('./Session');
+const WalletLedger = require('./WalletLedger');
 
 module.exports = {
   User,
+  DriverProfile,
+  Vehicle,
   Ride,
-  Referral,
-  Document,
-  Session
+  WalletLedger
 };
 
 // Alternative individual exports for convenience
@@ -86,4 +86,3 @@ module.exports.getRelationships = () => {
     }
   };
 };
-
