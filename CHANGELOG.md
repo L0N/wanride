@@ -5,6 +5,30 @@ All notable changes to WanRide Private Fleet System will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-01-28
+
+### Fixed
+- **README Documentation**: Updated to accurately reflect current implementation status
+- **API Endpoints**: Corrected documentation to show only implemented authentication endpoints
+- **Architecture Section**: Updated backend structure to show actual implemented components
+- **Environment Variables**: Updated to match current .env.example configuration
+- **Development Phases**: Clarified completed vs. planned phases
+- **Deployment Guide**: Updated with current production-ready deployment instructions
+- **Testing Section**: Updated to reflect current testing capabilities and tools
+
+### Changed
+- **Documentation Accuracy**: Removed placeholder content and outdated information
+- **Implementation Status**: Added clear indicators (✅) for completed features
+- **Frontend Status**: Clarified that frontend is currently basic React setup, not full PWA
+- **Real-time Features**: Updated Socket.io section to show current basic implementation
+- **Commission System**: Updated profit calculation to reflect implemented rating-based commission structure
+
+### Technical
+- Documentation now accurately reflects v2.1.0 implementation state
+- Removed references to unimplemented features (rides, referrals, documents APIs)
+- Updated environment configuration to match actual backend/.env.example
+- Clarified which features are implemented vs. planned for future phases
+
 ## [2.1.0] - 2026-01-28
 
 ### Added
