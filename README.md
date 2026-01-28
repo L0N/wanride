@@ -19,34 +19,43 @@ A production-ready ride hailing platform for private vehicle fleets in Port More
 
 ## 🏗️ Architecture
 
-### Backend (Node.js/Express)
+### Backend (Node.js/Express) - **IMPLEMENTED**
 ```
 backend/
-├── config/          # Database and logger configuration
-├── controllers/     # Route controllers (Phase 3+)
-├── middleware/      # Authentication and validation (Phase 3+)
-├── models/          # MongoDB schemas (Phase 2)
-├── routes/          # API endpoints (Phase 3+)
-├── services/        # Business logic (Phase 5+)
-├── socket/          # Socket.io handlers (Phase 7)
-├── utils/           # Helper functions (Phase 3+)
-└── server.js        # Main server file
+├── config/          # Database and logger configuration ✅
+├── controllers/     # Route controllers ✅
+│   └── authController.js  # Complete authentication system
+├── middleware/      # Authentication and validation ✅
+│   └── auth.js      # JWT auth, rate limiting, logging
+├── models/          # MongoDB schemas ✅
+│   ├── User.js      # Multi-role user system
+│   ├── DriverProfile.js  # Driver management
+│   ├── Vehicle.js   # Fleet management
+│   ├── Ride.js      # Ride tracking
+│   └── WalletLedger.js   # Financial transactions
+├── routes/          # API endpoints ✅
+│   └── auth.js      # Authentication routes
+├── services/        # Communication services ✅
+│   ├── emailService.js   # Professional email templates
+│   └── smsService.js     # PNG SMS with Twilio
+├── utils/           # Helper functions ✅
+│   ├── jwt.js       # JWT token management
+│   └── validation.js     # Input validation
+└── server.js        # Main server file ✅
 ```
 
-### Frontend (React)
+### Frontend (React) - **BASIC SETUP**
 ```
 frontend/
-├── public/          # Static assets
+├── public/          # Static assets ✅
 ├── src/
-│   ├── components/  # React components (Phase 9+)
-│   ├── contexts/    # Context API providers (Phase 9)
-│   ├── hooks/       # Custom React hooks (Phase 9)
-│   ├── pages/       # Page components (Phase 10)
-│   ├── services/    # API services (Phase 9)
-│   ├── utils/       # Helper functions (Phase 9)
-│   └── App.js       # Main App component
-└── package.json
+│   ├── App.js       # Basic React app ✅
+│   ├── App.css      # Basic styling ✅
+│   └── index.js     # Entry point ✅
+└── package.json     # Dependencies configured ✅
 ```
+
+**Note**: Frontend is currently a basic React setup. Full PWA implementation planned for Phase 5.
 
 ## 🚀 Quick Start
 
@@ -83,29 +92,39 @@ frontend/
 
 ### Environment Variables
 
-#### Backend (.env)
+#### Backend (.env) - **CURRENT IMPLEMENTATION**
 ```env
-# Database
-MONGODB_URI=mongodb://localhost:27017/wanrides
+# Database Configuration
+MONGODB_URI=mongodb://localhost:27017/wanride_fleet
+NODE_ENV=development
 
-# JWT
-JWT_SECRET=your_jwt_secret
-JWT_REFRESH_SECRET=your_refresh_secret
+# JWT Configuration
+JWT_ACCESS_SECRET=your_super_secure_access_secret_key_here
+JWT_REFRESH_SECRET=your_super_secure_refresh_secret_key_here
+JWT_ACCESS_EXPIRY=15m
+JWT_REFRESH_EXPIRY=7d
 
-# Twilio (Phone Verification)
-TWILIO_ACCOUNT_SID=your_twilio_sid
-TWILIO_AUTH_TOKEN=your_twilio_token
-TWILIO_PHONE_NUMBER=your_twilio_number
+# SMS Configuration (Twilio for PNG)
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_PHONE_NUMBER=+1234567890
 
-# Cloudinary (File Upload)
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+# Email Configuration (WanTek PNG Contact)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=frank@wantekpng.com
+EMAIL_PASS=your_email_password
+SUPPORT_EMAIL=frank@wantekpng.com
+BUSINESS_NAME=WanTek PNG
+BUSINESS_CONTACT=frank@wantekpng.com
 
-# Business Logic
-OPERATIONAL_COST_PERCENTAGE=20
-REFERRAL_PERCENTAGE=0.25
-REFERRAL_DURATION_MONTHS=12
+# CORS Configuration
+FRONTEND_URL=http://localhost:3000
+SOCKET_CORS_ORIGIN=http://localhost:3000
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=5
 ```
 
 #### Frontend (.env)
@@ -196,127 +215,181 @@ REACT_APP_MAPBOX_ACCESS_TOKEN=your_mapbox_token
 }
 ```
 
-## 🔌 API Endpoints
+## 🔌 API Endpoints - **IMPLEMENTED**
 
-### Authentication
-- `POST /api/auth/signup` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/verify-otp` - Phone verification
-- `POST /api/auth/refresh` - Refresh JWT token
+### Authentication System ✅
+- `POST /api/auth/register` - User registration with SMS OTP
+- `POST /api/auth/verify-otp` - Phone verification with OTP
+- `POST /api/auth/resend-otp` - Resend OTP for verification
+- `POST /api/auth/login` - User login with email/password
+- `POST /api/auth/refresh` - Refresh JWT access token
+- `GET /api/auth/profile` - Get current user profile
+- `POST /api/auth/logout` - Logout user
+- `GET /api/auth/health` - Authentication service health check
+- `POST /api/auth/test-sms` - Test SMS service (development only)
 
-### Rides
-- `POST /api/rides/request` - Request a ride
-- `PUT /api/rides/:id/accept` - Accept ride (driver)
-- `PUT /api/rides/:id/complete` - Complete ride
-- `GET /api/rides/history` - Ride history
+### System Health ✅
+- `GET /health` - Overall system health check
 
-### Referrals
-- `POST /api/referrals/generate` - Generate referral code
-- `POST /api/referrals/apply` - Apply referral code
-- `GET /api/referrals/earnings` - View earnings
+### **Coming in Phase 3+**
+- Fleet Management APIs
+- Real-time Dispatch APIs
+- Ride Management APIs
+- Driver Status APIs
+- Owner Dashboard APIs
 
-### Documents
-- `POST /api/documents/upload` - Upload documents
-- `PUT /api/admin/documents/:id/verify` - Verify documents (admin)
+## 🔄 Real-Time Events (Socket.io) - **BASIC SETUP**
 
-## 🔄 Real-Time Events (Socket.io)
-
-### Ride Events
+### Current Implementation ✅
 ```javascript
-// Client requests ride
-socket.emit('ride:request', rideData);
+// Basic connection handling
+io.on('connection', (socket) => {
+  console.log(`New client connected: ${socket.id}`);
+  
+  socket.emit('connected', { 
+    message: 'Connected to WanRides server',
+    socketId: socket.id 
+  });
 
-// Driver accepts ride
-socket.emit('ride:accept', { rideId, driverId });
-
-// Location updates
-socket.emit('location:update', { lat, lng, rideId });
-
-// Status updates
-socket.on('ride:status-update', (status) => {
-  // Handle status change
+  socket.on('disconnect', (reason) => {
+    console.log(`Client disconnected: ${socket.id}, reason: ${reason}`);
+  });
 });
 ```
 
-## 💰 Profit Calculation
+### **Coming in Phase 3: Real-time Dispatch Engine**
+- Driver location tracking
+- Live ride assignments
+- Real-time status updates
+- SOS emergency alerts
+- Dispatcher notifications
 
+## 💰 Commission System - **IMPLEMENTED**
+
+### Rating-Based Commission Structure
 ```javascript
-const calculateReferralEarnings = (rideFare, operationalCostPercentage) => {
-  const profit = rideFare * (1 - operationalCostPercentage / 100);
-  const referralEarning = profit * 0.0025; // 0.25%
-  return referralEarning;
+// Commission rates based on driver rating
+const getCommissionRate = (rating) => {
+  if (rating < 4.2) return 0.15; // 15%
+  if (rating < 4.6) return 0.20; // 20%
+  if (rating < 4.8) return 0.25; // 25%
+  return 0.30; // 30% for 4.8+ rating
+};
+
+// Calculate driver commission
+const calculateCommission = (totalFare, driverRating) => {
+  const rate = getCommissionRate(driverRating);
+  return totalFare * rate;
 };
 ```
 
-## 🚀 Deployment
+## 🚀 Deployment - **PRODUCTION READY**
 
-### Frontend (Vercel)
-```json
-{
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "build" }
-    }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "/index.html" }
-  ]
-}
+### Prerequisites ✅
+- Node.js 18+ and npm
+- MongoDB 5.0+
+- Twilio account for PNG SMS (+675)
+- SMTP email service (Gmail recommended)
+
+### Backend Deployment ✅
+```bash
+# 1. Clone and setup
+git clone https://github.com/L0N/wanride.git
+cd wanride/backend
+npm install
+
+# 2. Configure environment
+cp .env.example .env
+# Edit .env with your production values
+
+# 3. Start application
+npm start  # Production
+npm run dev  # Development
 ```
 
-### Backend (Render)
+### Production Platforms
+**Recommended**: Railway, Render, or Heroku
+
 ```yaml
+# render.yaml example
 services:
   - type: web
-    name: wanrides-api
+    name: wanride-api
     env: node
-    buildCommand: npm install
-    startCommand: npm start
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
         value: production
+      - key: MONGODB_URI
+        fromDatabase:
+          name: wanride-fleet
+          property: connectionString
 ```
+
+### Health Checks ✅
+- `GET /health` - System health
+- `GET /api/auth/health` - Auth service health
+
+**📚 Complete deployment guide available in [TECHNICAL_DOCS.md](./TECHNICAL_DOCS.md)**
 
 ## 📋 Development Phases
 
-- [x] **Phase 1**: Project Setup & Infrastructure
-- [ ] **Phase 2**: Database Models & Schemas
-- [ ] **Phase 3**: Authentication System
-- [ ] **Phase 4**: Document Upload & Verification
-- [ ] **Phase 5**: Referral System
-- [ ] **Phase 6**: Ride Management
-- [ ] **Phase 7**: Real-time Communication
-- [ ] **Phase 8**: Admin Dashboard
-- [ ] **Phase 9**: React Frontend Foundation
-- [ ] **Phase 10**: UI Components & Deployment
+- [x] **Phase 1**: Database Models & Private Fleet Architecture
+- [x] **Phase 2**: Authentication System with SMS OTP
+- [x] **Phase 2.1**: Contact Integration & Email Service (v2.1.0)
+- [ ] **Phase 3**: Real-time Dispatch Engine (Socket.io)
+- [ ] **Phase 4**: Fleet Management APIs
+- [ ] **Phase 5**: Progressive Web App (PWA)
+- [ ] **Phase 6**: Dispatcher Dashboard
+- [ ] **Phase 7**: Driver Mobile Interface
+- [ ] **Phase 8**: Owner Analytics & Reports
+- [ ] **Phase 9**: Payment & Commission System
+- [ ] **Phase 10**: Production Deployment
 
-## 🧪 Testing
+## 🧪 Testing - **CURRENT STATUS**
 
+### Backend Testing ✅
 ```bash
-# Backend tests
 cd backend
-npm test
-
-# Frontend tests
-cd frontend
-npm test
+npm run dev  # Development server with auto-reload
+npm start    # Production server
 ```
 
-## 📝 Scripts
+### API Testing ✅
+```bash
+# Test authentication endpoints
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User","email":"test@example.com","phone":"75123456","password":"Test123!","roles":["PASSENGER"]}'
 
-### Backend
+# Health check
+curl http://localhost:5000/health
+curl http://localhost:5000/api/auth/health
+```
+
+### **Coming Soon**
+- Unit tests with Jest
+- Integration tests
+- API documentation with Swagger
+
+## 📝 Available Scripts
+
+### Backend ✅
 - `npm start` - Start production server
-- `npm run dev` - Start development server with nodemon
-- `npm test` - Run tests
-- `npm run lint` - Run ESLint
+- `npm run dev` - Development server with nodemon
+- `npm install` - Install dependencies
 
-### Frontend
-- `npm start` - Start development server
+### Frontend ✅
+- `npm start` - Start React development server
 - `npm run build` - Build for production
-- `npm test` - Run tests
-- `npm run lint` - Run ESLint
+- `npm install` - Install dependencies
+
+### **Development Tools**
+- Environment configuration via `.env` files
+- MongoDB connection with auto-reconnect
+- Rate limiting and security middleware
+- Comprehensive error handling and logging
 
 ## 🤝 Contributing
 
@@ -332,8 +405,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-For support, email support@wanrides.com or join our Slack channel.
+For support and inquiries, contact us at **frank@wantekpng.com**
+
+**Business Contact**: WanTek PNG  
+**Email**: frank@wantekpng.com  
+**Location**: Port Moresby, Papua New Guinea
 
 ---
 
-**WanRides Team** - Building the future of ride-hailing 🚗💨
+**WanTek PNG** - Reliable Transport Solutions for Papua New Guinea 🚗🇵🇬

@@ -1,6 +1,7 @@
 const { User, DriverProfile } = require('../models');
 const jwtService = require('../utils/jwt');
 const smsService = require('../services/smsService');
+const emailService = require('../services/emailService');
 const { validationResult } = require('express-validator');
 
 class AuthController {
@@ -164,9 +165,17 @@ class AuthController {
       // Generate access tokens
       const tokens = jwtService.generateTokenPair(user);
 
-      // Send welcome SMS for drivers
+      // Send welcome SMS and email to drivers
       if (user.hasRole('DRIVER')) {
         await smsService.sendDriverWelcome(user.phone, user.name);
+        
+        // Also send welcome email if email service is available
+        try {
+          const emailResult = await emailService.sendDriverWelcomeEmail(user.email, user.name);
+          console.log('Driver welcome email sent:', emailResult.success ? 'Success' : 'Failed');
+        } catch (error) {
+          console.error('Failed to send driver welcome email:', error);
+        }
       }
 
       res.json({
@@ -238,7 +247,7 @@ class AuthController {
       if (user.isLocked) {
         return res.status(423).json({
           success: false,
-          message: 'Account is temporarily locked due to too many failed login attempts',
+          message: 'Account is temporarily locked due to too many failed login attempts. Need help? Contact frank@wantekpng.com',
           code: 'ACCOUNT_LOCKED'
         });
       }

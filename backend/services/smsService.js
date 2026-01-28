@@ -117,10 +117,10 @@ class SMSService {
    */
   buildOTPMessage(otp, purpose) {
     const messages = {
-      verification: `Your WanRide verification code is: ${otp}. Valid for 10 minutes. Do not share this code.`,
-      login: `Your WanRide login code is: ${otp}. Valid for 10 minutes. Do not share this code.`,
-      password_reset: `Your WanRide password reset code is: ${otp}. Valid for 10 minutes. Do not share this code.`,
-      driver_activation: `Your WanRide driver activation code is: ${otp}. Valid for 10 minutes. Welcome to the fleet!`
+      verification: `Your WanRide verification code is: ${otp}. Valid for 10 minutes. Do not share this code. Support: frank@wantekpng.com`,
+      login: `Your WanRide login code is: ${otp}. Valid for 10 minutes. Do not share this code. Support: frank@wantekpng.com`,
+      password_reset: `Your WanRide password reset code is: ${otp}. Valid for 10 minutes. Do not share this code. Support: frank@wantekpng.com`,
+      driver_activation: `Your WanRide driver activation code is: ${otp}. Valid for 10 minutes. Welcome to the fleet! Support: frank@wantekpng.com`
     };
 
     return messages[purpose] || messages.verification;
@@ -132,7 +132,7 @@ class SMSService {
   async sendDriverWelcome(phone, driverName) {
     try {
       const formattedPhone = this.formatPNGPhoneNumber(phone);
-      const message = `Welcome to WanRide Fleet, ${driverName}! You are now part of Port Moresby's premier transport service. Drive safely!`;
+      const message = `Welcome to WanRide Fleet, ${driverName}! You are now part of Port Moresby's premier transport service. Drive safely! Support: frank@wantekpng.com`;
 
       if (!this.client) {
         console.log(`[SMS MOCK] Welcome message to ${formattedPhone}: ${message}`);
@@ -201,7 +201,7 @@ class SMSService {
 
     for (const contact of emergencyContacts) {
       try {
-        const message = `EMERGENCY ALERT: WanRide passenger needs help. Location: ${rideDetails.location}. Ride ID: ${rideDetails.rideId}. Contact dispatcher immediately.`;
+        const message = `EMERGENCY ALERT: WanRide passenger needs help. Location: ${rideDetails.location}. Ride ID: ${rideDetails.rideId}. Contact dispatcher immediately. Support: frank@wantekpng.com`;
         
         const result = await this.sendRideNotification(contact.phone, message);
         results.push({
