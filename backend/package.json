@@ -1,7 +1,7 @@
 {
   "name": "wanrides-backend",
-  "version": "1.0.0",
-  "description": "WanRides MVP - Backend API for ride-hailing application",
+  "version": "2.1.0",
+  "description": "WanRide Private Fleet System - Backend API for company-owned vehicle fleet management",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
