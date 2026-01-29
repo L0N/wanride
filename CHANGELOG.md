@@ -5,7 +5,147 @@ All notable changes to WanRide Private Fleet System will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - v2.2.0
+## [Unreleased]
+
+### Added
+- Future enhancements and features
+
+## [2.3.0] - 2025-01-29
+
+### Added - Phase 6: Dispatcher Dashboard Implementation
+
+#### Core Dashboard Components
+- **DispatcherDashboard.jsx** (363 lines) - Main dashboard layout with responsive design
+  - Desktop/tablet/mobile responsive layouts (1200px+, 768-1199px, <768px breakpoints)
+  - Real-time connection monitoring with color-coded indicators
+  - SOS alert handling with audio/visual notifications (non-dismissible, auto-play)
+  - Role-based access control (requires DISPATCHER permission)
+  - PNG-specific connection quality indicators
+
+- **DispatcherMap.jsx** (430 lines) - Real-time fleet visualization
+  - Google Maps integration centered on Port Moresby (-9.4438, 147.1803)
+  - Live driver markers with status-based color coding (🟢🟡🔵🔴🟠)
+  - Ride route visualization with pickup/dropoff markers
+  - Driver InfoWindow popups with call/message actions
+  - Fleet summary overlay (total/available/active counts)
+  - Performance optimization with 5-second throttled updates
+  - Marker clustering for 10+ vehicles
+
+- **RideQueuePanel.jsx** (353 lines) - Pending rides management
+  - Real-time ride queue with wait time color indicators (🟢<2min, 🟡2-5min, 🔴>5min)
+  - K5 fare rounding for PNG currency compliance
+  - Multi-criteria filtering (all/urgent/VIP) and sorting (waitTime/fare/distance)
+  - One-click assignment triggering ManualAssignmentModal
+  - Passenger calling integration and ride cancellation with reasons
+  - Audio alerts for new ride requests
+
+- **ManualAssignmentModal.jsx** (470 lines) - PRIMARY assignment interface
+  - Distance-based driver sorting with Haversine formula calculations
+  - Interactive map showing pickup location and available drivers
+  - Driver selection with vehicle details, ratings, and ETA estimates
+  - Force assignment capability for ON_BREAK drivers (with confirmation)
+  - Assignment notes and audit trail functionality
+  - Real-time Socket.io integration for dispatcher:assign events
+
+- **DriverStatusPanel.jsx** (499 lines) - Fleet overview and management
+  - Virtualized list rendering for 50+ drivers (react-window performance)
+  - Status breakdown chart (Available/On Ride/En Route/Break/Offline)
+  - Search and filter functionality across name/plate/phone
+  - GPS staleness detection (>60 seconds without update)
+  - Shift duration tracking and daily earnings display
+  - Driver actions: call, message, force logout, view history
+
+- **ActiveRidesPanel.jsx** (456 lines) - In-progress rides monitoring
+  - Real-time active ride monitoring with status tracking
+  - SOS alert detection and prioritization (flashing red styling)
+  - Ride duration tracking with formatted display
+  - Participant information (passenger + driver + vehicle)
+  - Dispatcher notes system with time-stamped entries
+  - Multiple sorting options (startTime/duration/status with SOS priority)
+
+- **FleetMetricsPanel.jsx** (348 lines) - Analytics dashboard
+  - Key metrics display (Total/Available/On Rides/Health %)
+  - Fleet health score calculation (0-100%) with alert system
+  - Three interactive Recharts visualizations:
+    - Vehicle Status Distribution (donut chart)
+    - Hourly Demand (line chart, last 24 hours)
+    - Driver Utilization (horizontal bar chart)
+  - Health factors breakdown and quick stats summary
+
+- **RideHistoryPanel.jsx** (399 lines) - Historical data and export
+  - Advanced filtering system (date range, driver, passenger, vehicle, status)
+  - Paginated results (20 rides per page) with search capabilities
+  - CSV export functionality using PapaParse and file-saver
+  - Quick statistics (total rides, revenue, average fare, completion rate)
+  - Historical data table with comprehensive ride information
+
+- **ActionLogPanel.jsx** (343 lines) - Dispatcher audit trail
+  - Real-time action logging with severity levels (critical/warning/info)
+  - Filterable action types (assignments/cancellations/SOS/system)
+  - Detailed action tracking with timestamps and dispatcher attribution
+  - Related entity linking (rides, drivers) for audit purposes
+
+#### Technical Features
+- **PNG-Specific Optimizations**
+  - K5 currency rounding throughout all fare displays
+  - Port Moresby geographic center point for maps
+  - 3-second timeout configurations for limited bandwidth
+  - PNG timezone awareness (UTC+10)
+  - Network-aware connection quality indicators
+
+- **Real-time Socket.io Integration**
+  - Live driver location updates with throttled rendering
+  - Real-time ride status changes and notifications
+  - SOS alert propagation with immediate visual feedback
+  - Dispatcher action broadcasting for audit trails
+
+- **Performance Optimizations**
+  - Virtualized lists for large datasets (react-window)
+  - Throttled map updates (5-second intervals)
+  - Marker clustering for dense vehicle displays
+  - Debounced search inputs (500ms delay)
+  - Memoized calculations and callbacks
+
+- **Responsive Design**
+  - Desktop layout: 4-panel with sidebar + map + right panel + bottom drawer
+  - Tablet layout: Vertical stacking with swipeable tab navigation
+  - Mobile layout: Tab-based navigation with priority on ride queue
+
+#### Dependencies Added
+- `@react-google-maps/api ^2.19.2` - Google Maps integration
+- `recharts ^2.8.0` - Chart visualizations
+- `react-window ^1.8.8` - Virtualized list performance
+- `react-toastify ^9.1.3` - Toast notifications
+- `use-sound ^4.0.1` - Audio alert capabilities
+- `file-saver ^2.0.5` - CSV export functionality
+- `papaparse ^5.4.1` - CSV data processing
+- `@googlemaps/google-maps-services-js ^3.3.42` - Backend mapping services
+- `csv-writer ^1.6.0` - Backend CSV generation
+
+#### Business Logic Compliance
+- **Private Fleet Model**: Manual assignment as PRIMARY method (no automatic matching)
+- **Dispatcher Control**: Full override capability for all ride operations
+- **Employee Driver Model**: Force assignment capability, no driver rejection
+- **Cash-Based System**: K5 rounding, PGK currency, receipt generation ready
+- **SOS Handling**: Highest priority with real-time alerts and resolution tracking
+
+### Changed
+- Updated frontend version from 2.2.0 to 2.3.0
+- Updated backend version from 2.2.0 to 2.3.0
+
+### Technical Debt
+- Mock data implementation throughout (requires backend API integration)
+- CSS styling pending for all dispatcher components
+- Google Maps API key configuration needed
+- Backend dispatcher route implementation required
+- Real-time Socket.io server integration pending
+
+### Next Phase
+- Phase 7: CSS styling and visual polish
+- Phase 8: Backend API integration
+- Phase 9: Production deployment and testing
+
+## [2.2.0] - 2025-01-29
 
 ### Added
 - **Progressive Web App (PWA)**: Complete PWA implementation with offline capabilities
