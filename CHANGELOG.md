@@ -5,6 +5,65 @@ All notable changes to WanRide Private Fleet System will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - v2.2.0
+
+### Added
+- **Progressive Web App (PWA)**: Complete PWA implementation with offline capabilities
+- **Dispatcher Dashboard**: Real-time fleet management interface with live map
+- **Driver Mobile Interface**: Ride acceptance and completion system
+- **Passenger Booking App**: Ride booking and tracking interface
+- **Real-time Integration**: Enhanced Socket.io event handlers and synchronization
+- **Owner Analytics Dashboard**: Fleet analytics and financial reporting
+- **Advanced Dispatch Algorithm**: AI-assisted assignment with zone optimization
+- **PNG Market Localization**: Port Moresby landmarks and offline capabilities
+- **Comprehensive Testing**: Frontend component tests and E2E workflows
+- **Production Deployment**: Monitoring, error tracking, and deployment automation
+
+### Changed
+- **Frontend Architecture**: Transformed from basic React to full PWA
+- **User Experience**: Mobile-optimized interfaces for PNG market
+- **Real-time Features**: Complete Socket.io integration across all interfaces
+- **Performance**: Optimized for low-bandwidth PNG internet conditions
+
+### Technical
+- Service worker implementation for offline functionality
+- React Context API for state management
+- Socket.io client integration
+- Responsive design system
+- Offline queue management
+- PNG-specific business logic
+
+## [2.1.2] - 2026-01-29
+
+### Added
+- **Complete Ride Management System**: 771-line ride controller with 11 production-ready endpoints
+- **Security Fixes**: Resolved HIGH and MODERATE severity vulnerabilities
+- **Infrastructure Components**: Validation middleware, Winston logging, enhanced authentication
+- **K5 Kina Fare Calculation**: PNG-specific fare rounding and payment system
+- **Receipt System**: Automated email receipt generation with WanTek PNG branding
+- **Driver Rating System**: Automatic profile updates and commission calculation
+- **Wallet Ledger Integration**: Cash collection tracking and financial audit trails
+
+### Fixed
+- **HIGH SEVERITY**: Cloudinary Node SDK arbitrary argument injection (updated to ^2.9.0)
+- **MODERATE SEVERITY**: Nodemailer vulnerabilities (updated to ^7.0.13)
+- **Security**: Multer updated to ^2.0.0, removed deprecated crypto package
+- **Database**: Mongoose v7+ compatibility, fixed connection options
+- **Testing**: Fixed JWT service imports and Express app configuration
+
+### Changed
+- **Package Dependencies**: Updated all security-critical packages
+- **Database Models**: Fixed model imports for private fleet architecture
+- **Authentication Middleware**: Added generic authorize() function for role-based access
+- **Error Handling**: Comprehensive error handling and logging throughout ride system
+
+### Technical
+- 895 lines of new production-ready code
+- Complete ride lifecycle management (request → completion)
+- Real-time tracking integration foundation
+- PNG compliance (phone formats, currency, business logic)
+- Production-ready deployment status
+
 ## [2.1.1] - 2026-01-28
 
 ### Added

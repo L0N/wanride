@@ -1,6 +1,6 @@
 {
   "name": "wanrides-frontend",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "WanRide Private Fleet System - Frontend React PWA for company-owned vehicle fleet management",
   "private": true,
   "dependencies": {

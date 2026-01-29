@@ -1,6 +1,6 @@
 {
   "name": "wanrides-backend",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "WanRide Private Fleet System - Backend API for company-owned vehicle fleet management",
   "main": "server.js",
   "scripts": {
