@@ -1,6 +1,6 @@
 {
   "name": "wanrides-frontend",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "WanRide Private Fleet System - Frontend React PWA for company-owned vehicle fleet management",
   "private": true,
   "dependencies": {
@@ -34,7 +34,10 @@
     "react-device-detect": "^2.2.3",
     "workbox-background-sync": "^7.0.0",
     "idb": "^8.0.0",
-    "libphonenumber-js": "^1.10.51"
+    "libphonenumber-js": "^1.10.51",
+    "jspdf": "^2.5.1",
+    "html2canvas": "^1.4.1",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",
