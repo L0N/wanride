@@ -1,6 +1,6 @@
 {
   "name": "wanrides-backend",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "WanRide Private Fleet System - Backend API for company-owned vehicle fleet management",
   "main": "server.js",
   "scripts": {
@@ -60,7 +60,9 @@
     "json2csv": "^6.1.0",
     "exceljs": "^4.4.0",
     "chart.js": "^4.4.0",
-    "canvas": "^2.11.2"
+    "canvas": "^2.11.2",
+    "geolib": "^3.3.4",
+    "moment-timezone": "^0.5.43"
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
