@@ -88,7 +88,105 @@ const rideSchema = new mongoose.Schema({
     min: [5, 'Minimum fare is K5']
   },
   
-  // Cash Payment Tracking
+  // WEEK 1: Fare calculation details (from Phase 9 foundation)
+  fareCalculation: {
+    method: { 
+      type: String, 
+      enum: ['FLAT_NCD', 'FLAT_NCD_AIRPORT', 'DISTANCE_BASED'],
+      required: true 
+    },
+    baseFare: { type: Number, required: true },
+    distanceKm: Number,
+    distanceCharge: Number,
+    timeMinutes: Number,
+    timeCharge: Number,
+    subtotal: Number,
+    baseFareRounded: Number,
+    returnFee: Number,
+    airportAddon: Number,
+    finalFare: { type: Number, required: true }, // K5-rounded
+    withinNCD: { type: Boolean, default: true },
+    isAirportTrip: { type: Boolean, default: false },
+    breakdown: String,
+    calculatedAt: { type: Date, default: Date.now }
+  },
+  
+  // WEEK 2: Comprehensive payment tracking
+  payment: {
+    status: { 
+      type: String, 
+      enum: ['PENDING', 'COLLECTED', 'DISPUTED', 'WAIVED', 'REFUNDED'],
+      default: 'PENDING',
+      required: true
+    },
+    
+    // Payment amounts
+    amountDue: { type: Number, required: true }, // Same as fareCalculation.finalFare
+    amountCollected: Number, // Actual cash collected by driver
+    
+    // Payment metadata
+    collectedAt: Date,
+    collectedBy: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'User' 
+    }, // Driver who collected
+    confirmedBy: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'User' 
+    }, // Dispatcher/Owner who verified (if needed)
+    paymentMethod: {
+      type: String,
+      enum: ['CASH'], // Future: 'CARD', 'MOBILE_MONEY'
+      default: 'CASH'
+    },
+    
+    // Discrepancy tracking
+    discrepancy: {
+      exists: { type: Boolean, default: false },
+      reportedAmount: Number, // What passenger claims they paid
+      actualAmount: Number, // What driver collected
+      difference: Number, // Calculated difference
+      reason: String,
+      reportedAt: Date,
+      reportedBy: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User' 
+      }, // Usually driver
+      resolution: {
+        status: {
+          type: String,
+          enum: ['PENDING', 'RESOLVED', 'ESCALATED', 'CLOSED'],
+          default: 'PENDING'
+        },
+        resolvedBy: { 
+          type: mongoose.Schema.Types.ObjectId, 
+          ref: 'User' 
+        },
+        resolvedAt: Date,
+        resolutionNotes: String,
+        action: {
+          type: String,
+          enum: ['DRIVER_PAYS_DIFFERENCE', 'COMPANY_ABSORBS', 'PASSENGER_CONTACTED', 'NO_ACTION']
+        }
+      }
+    },
+    
+    // Notes and metadata
+    notes: String, // Driver notes about payment
+    receiptNumber: String, // Unique receipt identifier
+    receiptGenerated: { type: Boolean, default: false },
+    receiptSentVia: [String], // ['SMS', 'EMAIL', 'WHATSAPP']
+    
+    // Audit trail
+    statusHistory: [{
+      status: String,
+      changedAt: { type: Date, default: Date.now },
+      changedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      reason: String
+    }]
+  },
+  
+  // Legacy payment fields (kept for backward compatibility)
   paidAmount: {
     type: Number,
     default: 0,
@@ -247,6 +345,12 @@ rideSchema.index({ driverId: 1, status: 1 });
 rideSchema.index({ status: 1, 'timestamps.requested': -1 });
 rideSchema.index({ dispatcherId: 1, status: 1 });
 
+// WEEK 2: Payment-specific indexes
+rideSchema.index({ 'payment.status': 1, 'timestamps.completed': -1 });
+rideSchema.index({ 'payment.collectedBy': 1, 'payment.collectedAt': -1 });
+rideSchema.index({ 'payment.receiptNumber': 1 });
+rideSchema.index({ 'payment.discrepancy.exists': 1, 'payment.discrepancy.reportedAt': -1 });
+
 // Virtual for passenger details
 rideSchema.virtual('passenger', {
   ref: 'User',
@@ -307,6 +411,11 @@ rideSchema.pre('save', async function(next) {
     if (this.isModified('fare')) {
       this.fare = Math.round(this.fare / 5) * 5;
       if (this.fare < 5) this.fare = 5; // Minimum fare K5
+    }
+    
+    // WEEK 2: Set payment amountDue from fareCalculation
+    if (this.fareCalculation && this.fareCalculation.finalFare && this.isModified('fareCalculation')) {
+      this.payment.amountDue = this.fareCalculation.finalFare;
     }
     
     // Calculate driver commission based on rating
@@ -544,6 +653,16 @@ rideSchema.statics.getCashVarianceReport = function(startDate, endDate) {
       }
     }
   ]);
+};
+
+// WEEK 2: Instance method to generate receipt number
+rideSchema.methods.generateReceiptNumber = function() {
+  const moment = require('moment-timezone');
+  const PNG_TIMEZONE = 'Pacific/Port_Moresby';
+  
+  const date = moment().tz(PNG_TIMEZONE).format('YYYYMMDD');
+  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  return `WR-${date}-${random}`;
 };
 
 module.exports = mongoose.model('Ride', rideSchema);

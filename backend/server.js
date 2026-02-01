@@ -16,6 +16,7 @@ const logger = require('./config/logger');
 const authRoutes = require('./routes/auth');
 const rideRoutes = require('./routes/rides');
 const fareRoutes = require('./routes/fareRoutes');
+const driverRoutes = require('./routes/driverRoutes');
 // const documentRoutes = require('./routes/documents');
 // const referralRoutes = require('./routes/referrals');
 // const adminRoutes = require('./routes/admin');
@@ -85,6 +86,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/rides', rideRoutes);
 app.use('/api/fare', fareRoutes);
+app.use('/api/driver', driverRoutes);
 // app.use('/api/documents', documentRoutes);
 // app.use('/api/referrals', referralRoutes);
 // app.use('/api/admin', adminRoutes);

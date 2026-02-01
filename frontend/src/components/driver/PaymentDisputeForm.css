@@ -1,0 +1,434 @@
+/* PaymentDisputeForm.css - Week 2: Payment Dispute Styles */
+
+.payment-dispute-form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Header Section */
+.dispute-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #ffebee;
+}
+
+.dispute-header h2 {
+  color: #d32f2f;
+  margin: 0 0 10px 0;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.dispute-header .subtitle {
+  color: #666;
+  font-size: 16px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Expected Amount Display */
+.expected-amount-display {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+  border: 2px solid #e0e0e0;
+}
+
+.amount-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.amount-card label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.amount-card .amount.expected {
+  font-size: 28px;
+  font-weight: bold;
+  color: #1976D2;
+  background: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 2px solid #1976D2;
+}
+
+.ride-details {
+  text-align: center;
+}
+
+.ride-details .route {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.ride-details .passenger {
+  color: #666;
+  font-size: 14px;
+}
+
+/* Form Styles */
+.dispute-form {
+  margin-bottom: 25px;
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+  font-size: 16px;
+}
+
+.required {
+  color: #d32f2f;
+  font-weight: bold;
+}
+
+/* Amount Input */
+.amount-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currency-prefix {
+  position: absolute;
+  left: 12px;
+  font-weight: bold;
+  color: #666;
+  font-size: 18px;
+  z-index: 1;
+}
+
+.amount-input-wrapper input {
+  width: 100%;
+  padding: 15px 15px 15px 35px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  transition: border-color 0.2s;
+}
+
+.amount-input-wrapper input:focus {
+  outline: none;
+  border-color: #1976D2;
+}
+
+.amount-input-wrapper input.invalid {
+  border-color: #d32f2f;
+  background: #ffebee;
+}
+
+.input-error {
+  color: #d32f2f;
+  font-size: 14px;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+/* Difference Display */
+.difference-display {
+  margin-top: 15px;
+  padding: 15px;
+  border-radius: 8px;
+  border: 2px solid;
+}
+
+.difference-display.short-paid {
+  background: #ffebee;
+  border-color: #f44336;
+}
+
+.difference-display.overpaid {
+  background: #e8f5e8;
+  border-color: #4caf50;
+}
+
+.difference-amount {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.difference-display.short-paid .difference-amount {
+  color: #d32f2f;
+}
+
+.difference-display.overpaid .difference-amount {
+  color: #2e7d32;
+}
+
+.difference-explanation {
+  font-size: 14px;
+}
+
+.difference-explanation .short-paid {
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+.difference-explanation .overpaid {
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+/* Reason Suggestions */
+.reason-suggestions {
+  margin-bottom: 15px;
+}
+
+.suggestions-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.suggestion-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.suggestion-btn {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #666;
+}
+
+.suggestion-btn:hover:not(:disabled) {
+  background: #e3f2fd;
+  border-color: #1976D2;
+  color: #1976D2;
+}
+
+.suggestion-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Textarea */
+textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #1976D2;
+}
+
+textarea.invalid {
+  border-color: #d32f2f;
+  background: #ffebee;
+}
+
+.char-count {
+  text-align: right;
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.char-count .min-length {
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+/* Error Message */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffebee;
+  border: 1px solid #f44336;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 20px;
+  color: #c62828;
+  font-size: 14px;
+}
+
+.error-message .icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* Dispute Info */
+.dispute-info {
+  margin-bottom: 25px;
+}
+
+.info-box {
+  background: #e3f2fd;
+  border: 1px solid #1976D2;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.info-box h4 {
+  margin: 0 0 10px 0;
+  color: #1565C0;
+  font-size: 16px;
+}
+
+.info-box ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #1565C0;
+}
+
+.info-box li {
+  margin-bottom: 5px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 15px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: #d32f2f;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #c62828;
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: #f5f5f5;
+  color: #666;
+  border: 1px solid #ddd;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #e0e0e0;
+}
+
+/* Spinner Animation */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .payment-dispute-form {
+    margin: 10px;
+    padding: 15px;
+  }
+  
+  .dispute-header h2 {
+    font-size: 24px;
+  }
+  
+  .amount-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .amount-card .amount.expected {
+    font-size: 24px;
+    align-self: center;
+  }
+  
+  .suggestion-buttons {
+    flex-direction: column;
+  }
+  
+  .suggestion-btn {
+    text-align: left;
+    border-radius: 8px;
+  }
+  
+  .action-buttons {
+    gap: 10px;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .payment-dispute-form {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  
+  .action-buttons,
+  .dispute-info {
+    display: none;
+  }
+}
