@@ -38,8 +38,10 @@ const io = socketIo(server, {
   }
 });
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB (skip in test mode unless explicitly requested)
+if (process.env.NODE_ENV !== 'test' || process.env.CONNECT_DB_IN_TEST === 'true') {
+  connectDB();
+}
 
 // Security middleware
 app.use(helmet());
