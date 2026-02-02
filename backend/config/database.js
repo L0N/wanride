@@ -47,6 +47,12 @@ const connectDB = async () => {
 
   } catch (error) {
     logger.error(`Database connection failed: ${error.message}`);
+    
+    // In test environment, don't exit the process
+    if (process.env.NODE_ENV === 'test') {
+      throw error;
+    }
+    
     process.exit(1);
   }
 };

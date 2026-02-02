@@ -18,6 +18,7 @@ const rideRoutes = require('./routes/rides');
 const fareRoutes = require('./routes/fareRoutes');
 const driverRoutes = require('./routes/driverRoutes');
 const ownerRoutes = require('./routes/ownerRoutes');
+const healthRoutes = require('./routes/health');
 // const documentRoutes = require('./routes/documents');
 // const referralRoutes = require('./routes/referrals');
 // const adminRoutes = require('./routes/admin');
@@ -37,8 +38,10 @@ const io = socketIo(server, {
   }
 });
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB (skip in test mode unless explicitly requested)
+if (process.env.NODE_ENV !== 'test' || process.env.CONNECT_DB_IN_TEST === 'true') {
+  connectDB();
+}
 
 // Security middleware
 app.use(helmet());
@@ -84,6 +87,10 @@ app.get('/health', (req, res) => {
 });
 
 // API routes
+// Health check routes (before authentication)
+app.use('/health', healthRoutes);
+app.use('/api/health', healthRoutes);
+
 app.use('/api/auth', authRoutes);
 app.use('/api/rides', rideRoutes);
 app.use('/api/fare', fareRoutes);
@@ -153,8 +160,11 @@ process.on('SIGINT', () => {
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
-  logger.info(`WanRides server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-});
+// Only start the server if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, () => {
+    logger.info(`WanRides server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+  });
+}
 
 module.exports = { app, server, io };

@@ -25,13 +25,23 @@ describe('Payment Collection API', () => {
 
   beforeAll(async () => {
     // Connect to test database
-    await mongoose.connect(process.env.MONGODB_TEST_URI || 'mongodb://localhost:27017/wanride_test');
+    try {
+      await mongoose.connect(process.env.MONGODB_TEST_URI || 'mongodb://localhost:27017/wanride_test', {
+        bufferCommands: false,
+        serverSelectionTimeoutMS: 5000,
+      });
+    } catch (error) {
+      console.error('Failed to connect to test database:', error.message);
+      throw error;
+    }
   });
 
   beforeEach(async () => {
     // Clear test data
-    await User.deleteMany({});
-    await Ride.deleteMany({});
+    if (mongoose.connection.readyState === 1) {
+      await User.deleteMany({});
+      await Ride.deleteMany({});
+    }
 
     // Create test driver
     const driver = new User({
@@ -103,7 +113,13 @@ describe('Payment Collection API', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.close();
+    try {
+      if (mongoose.connection.readyState === 1) {
+        await mongoose.connection.close();
+      }
+    } catch (error) {
+      console.error('Error during test cleanup:', error.message);
+    }
   });
 
   describe('POST /api/driver/rides/:rideId/payment', () => {

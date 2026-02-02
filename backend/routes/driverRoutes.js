@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
-const { authenticateJWT } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const Ride = require('../models/Ride');
 const CommissionPayout = require('../models/CommissionPayout');
 const { generateReceipt, sendReceiptSMS, sendReceiptEmail } = require('../services/receiptService');
@@ -44,7 +44,7 @@ const requireDriver = (req, res, next) => {
  * @access Private (Driver only)
  */
 router.post('/rides/:rideId/payment', [
-  authenticateJWT,
+  authenticate,
   requireDriver,
   body('amountCollected')
     .isFloat({ min: 5 })
@@ -215,7 +215,7 @@ router.post('/rides/:rideId/payment', [
  * @access Private (Driver only)
  */
 router.post('/rides/:rideId/dispute', [
-  authenticateJWT,
+  authenticate,
   requireDriver,
   body('reportedAmount')
     .isFloat({ min: 0 })
@@ -348,7 +348,7 @@ router.post('/rides/:rideId/dispute', [
  * @access Private (Driver only)
  */
 router.get('/rides/:rideId/receipt', [
-  authenticateJWT,
+  authenticate,
   requireDriver
 ], async (req, res) => {
   try {
@@ -407,7 +407,7 @@ router.get('/rides/:rideId/receipt', [
  * @access Private (Driver only)
  */
 router.post('/rides/:rideId/receipt/send', [
-  authenticateJWT,
+  authenticate,
   requireDriver,
   body('method')
     .isIn(['SMS', 'EMAIL'])
@@ -508,7 +508,7 @@ router.post('/rides/:rideId/receipt/send', [
  * @access Private (Driver only)
  */
 router.get('/rides/active', [
-  authenticateJWT,
+  authenticate,
   requireDriver
 ], async (req, res) => {
   try {
@@ -543,7 +543,7 @@ router.get('/rides/active', [
  * @access Private (Driver only)
  */
 router.get('/rides/completed', [
-  authenticateJWT,
+  authenticate,
   requireDriver
 ], async (req, res) => {
   try {
@@ -595,7 +595,7 @@ router.get('/rides/completed', [
  * @desc Get driver's commission summary for a period
  * @access Private (Driver only)
  */
-router.get('/commissions', authenticateJWT, requireDriver, async (req, res) => {
+router.get('/commissions', authenticate, requireDriver, async (req, res) => {
   try {
     const driverId = req.user._id;
     const { period = 'THIS_WEEK' } = req.query;
@@ -652,7 +652,7 @@ router.get('/commissions', authenticateJWT, requireDriver, async (req, res) => {
  * @desc Get driver's payout history
  * @access Private (Driver only)
  */
-router.get('/payouts', authenticateJWT, requireDriver, async (req, res) => {
+router.get('/payouts', authenticate, requireDriver, async (req, res) => {
   try {
     const driverId = req.user._id;
     const { page = 1, limit = 10, status } = req.query;
@@ -699,7 +699,7 @@ router.get('/payouts', authenticateJWT, requireDriver, async (req, res) => {
  * @desc Get detailed payout information
  * @access Private (Driver only)
  */
-router.get('/payouts/:payoutId', authenticateJWT, requireDriver, async (req, res) => {
+router.get('/payouts/:payoutId', authenticate, requireDriver, async (req, res) => {
   try {
     const driverId = req.user._id;
     
@@ -746,7 +746,7 @@ router.get('/payouts/:payoutId', authenticateJWT, requireDriver, async (req, res
  * @desc Get driver's commission statistics summary
  * @access Private (Driver only)
  */
-router.get('/commission-stats', authenticateJWT, requireDriver, async (req, res) => {
+router.get('/commission-stats', authenticate, requireDriver, async (req, res) => {
   try {
     const driverId = req.user._id;
     

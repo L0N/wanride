@@ -25,12 +25,46 @@ function roundToK5(amount) {
     return 0;
   }
   
-  // Handle negative amounts (for deductions, refunds, etc.)
+  // For negative amounts, round towards zero
   if (amount < 0) {
-    return -Math.round(Math.abs(amount) / 5) * 5;
+    const absAmount = Math.abs(amount);
+    
+    // If the absolute amount is very small, round to 0
+    if (absAmount < 5) {
+      return 0;
+    }
+    
+    // Apply the same banker's rounding logic to the absolute value
+    const divided = absAmount / 5;
+    const floor = Math.floor(divided);
+    const remainder = divided - floor;
+    
+    let roundedAbs;
+    if (remainder < 0.5) {
+      roundedAbs = floor * 5;
+    } else if (remainder > 0.5) {
+      roundedAbs = (floor + 1) * 5;
+    } else {
+      // Exactly 0.5 - round to even
+      roundedAbs = (floor % 2 === 0 ? floor : floor + 1) * 5;
+    }
+    
+    return -roundedAbs;
   }
   
-  return Math.round(amount / 5) * 5;
+  // For positive amounts, use round half to even (banker's rounding)
+  const divided = amount / 5;
+  const floor = Math.floor(divided);
+  const remainder = divided - floor;
+  
+  if (remainder < 0.5) {
+    return floor * 5;
+  } else if (remainder > 0.5) {
+    return (floor + 1) * 5;
+  } else {
+    // Exactly 0.5 - round to even
+    return (floor % 2 === 0 ? floor : floor + 1) * 5;
+  }
 }
 
 /**

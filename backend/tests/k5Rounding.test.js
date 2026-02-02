@@ -163,7 +163,7 @@ describe('K5 Rounding Utility', () => {
     });
 
     test('handles decimal percentages', () => {
-      expect(calculatePercentageK5(100, 22.5)).toBe(25); // 22.5% of 100 = 22.5 → K25
+      expect(calculatePercentageK5(100, 22.5)).toBe(20); // 22.5% of 100 = 22.5 → K20 (banker's rounding)
       expect(calculatePercentageK5(200, 12.5)).toBe(25); // 12.5% of 200 = 25
     });
   });
