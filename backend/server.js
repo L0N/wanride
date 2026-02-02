@@ -158,8 +158,11 @@ process.on('SIGINT', () => {
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
-  logger.info(`WanRides server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-});
+// Only start the server if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, () => {
+    logger.info(`WanRides server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+  });
+}
 
 module.exports = { app, server, io };
