@@ -3,16 +3,27 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { authenticateJWT } = require('../middleware/auth');
 const Ride = require('../models/Ride');
+const CommissionPayout = require('../models/CommissionPayout');
 const { generateReceipt, sendReceiptSMS, sendReceiptEmail } = require('../services/receiptService');
 const { roundToK5, isK5Rounded } = require('../utils/k5Rounding');
+const { 
+  calculateDriverCommissions,
+  getCurrentWeekRange,
+  getLastWeekRange,
+  getCurrentMonthRange,
+  getTodayRange
+} = require('../services/commissionService');
+const moment = require('moment-timezone');
 
 /**
- * Driver Routes for WanRide PNG - Week 2: Cash Payment Collection
+ * Driver Routes for WanRide PNG - Week 2 & 3: Payment Collection & Commission System
  * 
  * Handles:
  * - Payment confirmation
  * - Payment disputes
  * - Receipt generation and retrieval
+ * - Commission tracking and breakdown
+ * - Payout history
  * - Driver-specific ride operations
  */
 
@@ -574,6 +585,210 @@ router.get('/rides/completed', [
     res.status(500).json({
       success: false,
       message: 'Failed to get completed rides',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+/**
+ * @route GET /api/driver/commissions?period=THIS_WEEK
+ * @desc Get driver's commission summary for a period
+ * @access Private (Driver only)
+ */
+router.get('/commissions', authenticateJWT, requireDriver, async (req, res) => {
+  try {
+    const driverId = req.user._id;
+    const { period = 'THIS_WEEK' } = req.query;
+    
+    let dateRange;
+    
+    switch (period) {
+      case 'TODAY':
+        dateRange = getTodayRange();
+        break;
+      
+      case 'THIS_WEEK':
+        dateRange = getCurrentWeekRange();
+        break;
+      
+      case 'LAST_WEEK':
+        dateRange = getLastWeekRange();
+        break;
+      
+      case 'THIS_MONTH':
+        dateRange = getCurrentMonthRange();
+        break;
+      
+      default:
+        return res.status(400).json({ 
+          success: false,
+          message: 'Invalid period specified. Use: TODAY, THIS_WEEK, LAST_WEEK, THIS_MONTH' 
+        });
+    }
+    
+    const commissionData = await calculateDriverCommissions(
+      driverId,
+      dateRange.from,
+      dateRange.to
+    );
+    
+    res.json({
+      success: true,
+      data: commissionData
+    });
+    
+  } catch (error) {
+    console.error('Commission data error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to retrieve commission data',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+/**
+ * @route GET /api/driver/payouts
+ * @desc Get driver's payout history
+ * @access Private (Driver only)
+ */
+router.get('/payouts', authenticateJWT, requireDriver, async (req, res) => {
+  try {
+    const driverId = req.user._id;
+    const { page = 1, limit = 10, status } = req.query;
+    
+    const query = { driverId: driverId };
+    if (status) {
+      query.status = status;
+    }
+    
+    const payouts = await CommissionPayout.find(query)
+      .sort({ 'period.from': -1 })
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit))
+      .select('-rides') // Exclude rides array for performance
+      .lean();
+    
+    const total = await CommissionPayout.countDocuments(query);
+    
+    res.json({
+      success: true,
+      data: {
+        payouts: payouts,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: total,
+          pages: Math.ceil(total / parseInt(limit))
+        }
+      }
+    });
+    
+  } catch (error) {
+    console.error('Payout history error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to retrieve payout history',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+/**
+ * @route GET /api/driver/payouts/:payoutId
+ * @desc Get detailed payout information
+ * @access Private (Driver only)
+ */
+router.get('/payouts/:payoutId', authenticateJWT, requireDriver, async (req, res) => {
+  try {
+    const driverId = req.user._id;
+    
+    const payout = await CommissionPayout.findOne({
+      _id: req.params.payoutId,
+      driverId: driverId
+    })
+      .populate('driverId', 'name email phone')
+      .populate({
+        path: 'rides',
+        select: 'pickup destination fareCalculation payment timestamps',
+        populate: { 
+          path: 'passenger', 
+          select: 'name phone' 
+        }
+      })
+      .populate('approvedBy', 'name')
+      .populate('paidBy', 'name');
+    
+    if (!payout) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Payout not found' 
+      });
+    }
+    
+    res.json({ 
+      success: true,
+      data: { payout } 
+    });
+    
+  } catch (error) {
+    console.error('Payout detail error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to retrieve payout details',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+/**
+ * @route GET /api/driver/commission-stats
+ * @desc Get driver's commission statistics summary
+ * @access Private (Driver only)
+ */
+router.get('/commission-stats', authenticateJWT, requireDriver, async (req, res) => {
+  try {
+    const driverId = req.user._id;
+    
+    // Get stats for different periods
+    const thisWeek = await calculateDriverCommissions(driverId, ...Object.values(getCurrentWeekRange()));
+    const lastWeek = await calculateDriverCommissions(driverId, ...Object.values(getLastWeekRange()));
+    const thisMonth = await calculateDriverCommissions(driverId, ...Object.values(getCurrentMonthRange()));
+    
+    // Get recent payouts
+    const recentPayouts = await CommissionPayout.find({ driverId: driverId })
+      .sort({ 'period.from': -1 })
+      .limit(5)
+      .select('period totalCommissions netPayout status')
+      .lean();
+    
+    res.json({
+      success: true,
+      data: {
+        thisWeek: {
+          rides: thisWeek.ridesCompleted,
+          commissions: thisWeek.totalCommissions,
+          average: thisWeek.averageCommissionPerRide
+        },
+        lastWeek: {
+          rides: lastWeek.ridesCompleted,
+          commissions: lastWeek.totalCommissions,
+          average: lastWeek.averageCommissionPerRide
+        },
+        thisMonth: {
+          rides: thisMonth.ridesCompleted,
+          commissions: thisMonth.totalCommissions,
+          average: thisMonth.averageCommissionPerRide
+        },
+        recentPayouts: recentPayouts
+      }
+    });
+    
+  } catch (error) {
+    console.error('Commission stats error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to retrieve commission statistics',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }

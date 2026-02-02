@@ -106,6 +106,11 @@ io.on('connection', (socket) => {
   socketHandlers.handleConnection(socket);
 });
 
+// Initialize commission payout cron job
+const { scheduleWeeklyPayouts } = require('./jobs/generateWeeklyPayouts');
+scheduleWeeklyPayouts(io);
+console.log('✅ Commission payout cron job scheduled');
+
 // 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({
