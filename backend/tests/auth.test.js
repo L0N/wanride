@@ -12,14 +12,28 @@ describe('Authentication System', () => {
 
   beforeAll(async () => {
     // Connect to test database
-    await mongoose.connect(MONGODB_TEST_URI);
+    try {
+      await mongoose.connect(MONGODB_TEST_URI, {
+        bufferCommands: false,
+        serverSelectionTimeoutMS: 5000,
+      });
+    } catch (error) {
+      console.error('Failed to connect to test database:', error.message);
+      throw error;
+    }
     server = app.listen(0); // Use random port for testing
   });
 
   afterAll(async () => {
     // Clean up
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
+    try {
+      if (mongoose.connection.readyState === 1) {
+        await mongoose.connection.dropDatabase();
+        await mongoose.connection.close();
+      }
+    } catch (error) {
+      console.error('Error during test cleanup:', error.message);
+    }
     if (server) {
       server.close();
     }
@@ -27,7 +41,9 @@ describe('Authentication System', () => {
 
   beforeEach(async () => {
     // Clear users collection before each test
-    await User.deleteMany({});
+    if (mongoose.connection.readyState === 1) {
+      await User.deleteMany({});
+    }
   });
 
   describe('POST /api/auth/register', () => {

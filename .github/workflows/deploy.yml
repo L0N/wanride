@@ -76,6 +76,7 @@ jobs:
         env:
           NODE_ENV: test
           MONGODB_URI: mongodb://localhost:27017/wanride_test
+          MONGODB_TEST_URI: mongodb://localhost:27017/wanride_test
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: test-secret-key-for-ci
         run: |
@@ -117,7 +118,7 @@ jobs:
           output: 'trivy-results.sarif'
 
       - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
