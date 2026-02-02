@@ -1,0 +1,341 @@
+/* Payout Details Modal Styles */
+.payout-details-modal {
+  max-width: 1000px;
+}
+
+.payout-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.driver-info h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.driver-info p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 4px 0;
+}
+
+.payout-status {
+  flex-shrink: 0;
+}
+
+/* Period Info */
+.period-info {
+  margin-bottom: 24px;
+}
+
+.period-info h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 12px 0;
+}
+
+.period-details p {
+  margin: 4px 0;
+  color: #475569;
+}
+
+.period-details p:first-child {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Financial Summary */
+.financial-summary {
+  margin-bottom: 24px;
+}
+
+.financial-summary h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-item .label {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.summary-item .value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+}
+
+.summary-item .value.commission {
+  color: #059669;
+}
+
+.summary-item .value.deduction {
+  color: #dc2626;
+}
+
+.summary-item.total {
+  grid-column: 1 / -1;
+  border-top: 1px solid #cbd5e1;
+  padding-top: 12px;
+  margin-top: 8px;
+}
+
+.summary-item.total .label,
+.summary-item.total .value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Deductions Section */
+.deductions-section {
+  margin-bottom: 24px;
+}
+
+.deductions-section h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.deductions-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.deductions-table th {
+  background: #f1f5f9;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #334155;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 14px;
+}
+
+.deductions-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.deductions-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Status History */
+.status-history {
+  margin-bottom: 24px;
+}
+
+.status-history h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.status-timeline {
+  position: relative;
+  padding-left: 24px;
+}
+
+.status-timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e2e8f0;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -20px;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px #e2e8f0;
+}
+
+.timeline-dot.created {
+  background: #64748b;
+}
+
+.timeline-dot.approved {
+  background: #3b82f6;
+}
+
+.timeline-dot.paid {
+  background: #059669;
+}
+
+.timeline-content strong {
+  font-weight: 600;
+  color: #1e293b;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.timeline-content p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 2px 0;
+}
+
+.timeline-content .notes {
+  font-style: italic;
+  color: #475569;
+}
+
+/* Rides Section */
+.rides-section {
+  margin-bottom: 24px;
+}
+
+.rides-section h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.rides-list {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.ride-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.ride-item:last-child {
+  margin-bottom: 0;
+}
+
+.ride-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.ride-id {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.ride-date {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.ride-fare {
+  font-weight: 600;
+  color: #059669;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+}
+
+.more-rides {
+  text-align: center;
+  padding: 12px;
+  color: #64748b;
+  font-style: italic;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .payout-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .summary-item.total {
+    grid-column: 1;
+  }
+  
+  .deductions-table {
+    font-size: 14px;
+  }
+  
+  .deductions-table th,
+  .deductions-table td {
+    padding: 8px;
+  }
+  
+  .timeline-item {
+    margin-bottom: 16px;
+  }
+  
+  .rides-list {
+    max-height: 200px;
+  }
+  
+  .ride-item {
+    padding: 6px 8px;
+  }
+}
