@@ -1,0 +1,411 @@
+/* Commission Payouts Page Styles */
+.commission-payouts {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.page-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Status Tabs */
+.status-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.status-tabs button {
+  padding: 12px 20px;
+  border: none;
+  background: none;
+  color: #6b7280;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.status-tabs button:hover {
+  color: #374151;
+  background-color: #f9fafb;
+}
+
+.status-tabs button.active {
+  color: #059669;
+  border-bottom-color: #059669;
+  background-color: #ecfdf5;
+}
+
+/* Pending Summary */
+.pending-summary {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 12px;
+  border: 1px solid #f59e0b;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.summary-card .label {
+  font-size: 14px;
+  color: #92400e;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.summary-card .amount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #92400e;
+}
+
+.summary-card .count {
+  font-size: 24px;
+  font-weight: 700;
+  color: #92400e;
+}
+
+/* Loading and Error States */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #059669;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error {
+  text-align: center;
+  padding: 40px 20px;
+  color: #dc2626;
+}
+
+.error button {
+  margin-top: 16px;
+  padding: 8px 16px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.no-payouts {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+/* Payouts Table */
+.payouts-table {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.payouts-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.payouts-table th {
+  background: #f9fafb;
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.payouts-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.payouts-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* Row Status Styling */
+.payouts-table tr.status-pending {
+  border-left: 4px solid #f59e0b;
+}
+
+.payouts-table tr.status-approved {
+  border-left: 4px solid #3b82f6;
+}
+
+.payouts-table tr.status-paid {
+  border-left: 4px solid #059669;
+}
+
+/* Driver Cell */
+.driver-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.driver-cell strong {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.driver-id {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Period Cell */
+.period-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.week-label {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* Amount Styling */
+.amount {
+  font-weight: 600;
+  text-align: right;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+}
+
+.amount.commission {
+  color: #059669;
+}
+
+.amount .deduction {
+  color: #dc2626;
+}
+
+.amount .no-deduction {
+  color: #6b7280;
+  font-style: italic;
+}
+
+.amount.net-payout {
+  font-size: 16px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.status-approved {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.status-paid {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* Action Buttons */
+.actions-cell {
+  text-align: center;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-small.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.btn-small.btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+.btn-small.btn-tertiary {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.btn-small.btn-tertiary:hover {
+  background: #fde68a;
+}
+
+.btn-small.btn-success {
+  background: #059669;
+  color: white;
+}
+
+.btn-small.btn-success:hover {
+  background: #047857;
+}
+
+.btn-small.btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-small.btn-primary:hover {
+  background: #2563eb;
+}
+
+/* Totals Row */
+.totals-row {
+  background: #f9fafb;
+  font-weight: 600;
+}
+
+.totals-row td {
+  border-top: 2px solid #e5e7eb;
+  border-bottom: none;
+}
+
+/* Button Styles */
+.btn-primary {
+  background: #059669;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #047857;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .payouts-table {
+    overflow-x: auto;
+  }
+  
+  .payouts-table table {
+    min-width: 1000px;
+  }
+}
+
+@media (max-width: 768px) {
+  .commission-payouts {
+    padding: 16px;
+  }
+  
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .status-tabs {
+    flex-wrap: wrap;
+  }
+  
+  .pending-summary {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
