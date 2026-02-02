@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
-const { authenticateJWT } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const fareCalculationService = require('../services/fareCalculationService');
 const { roundToK5 } = require('../utils/k5Rounding');
 
@@ -74,7 +74,7 @@ router.post('/calculate', [
  * @desc Get current fare configuration
  * @access Private (Owner only)
  */
-router.get('/config', authenticateJWT, async (req, res) => {
+router.get('/config', authenticate, async (req, res) => {
   try {
     // Check if user is owner
     if (!req.user.roles.includes('OWNER')) {
@@ -106,7 +106,7 @@ router.get('/config', authenticateJWT, async (req, res) => {
  * @desc Update fare configuration
  * @access Private (Owner only)
  */
-router.put('/config', authenticateJWT, [
+router.put('/config', authenticate, [
   body('ncdFlatRate')
     .optional()
     .isFloat({ min: 5 })
@@ -261,7 +261,7 @@ router.post('/validate-location', [
  * @desc Calculate commission for a fare
  * @access Private (Driver, Dispatcher, Owner)
  */
-router.post('/commission', authenticateJWT, [
+router.post('/commission', authenticate, [
   body('fare')
     .isFloat({ min: 5 })
     .withMessage('Fare must be at least K5')
