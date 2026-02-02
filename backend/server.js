@@ -18,6 +18,7 @@ const rideRoutes = require('./routes/rides');
 const fareRoutes = require('./routes/fareRoutes');
 const driverRoutes = require('./routes/driverRoutes');
 const ownerRoutes = require('./routes/ownerRoutes');
+const healthRoutes = require('./routes/health');
 // const documentRoutes = require('./routes/documents');
 // const referralRoutes = require('./routes/referrals');
 // const adminRoutes = require('./routes/admin');
@@ -84,6 +85,10 @@ app.get('/health', (req, res) => {
 });
 
 // API routes
+// Health check routes (before authentication)
+app.use('/health', healthRoutes);
+app.use('/api/health', healthRoutes);
+
 app.use('/api/auth', authRoutes);
 app.use('/api/rides', rideRoutes);
 app.use('/api/fare', fareRoutes);
